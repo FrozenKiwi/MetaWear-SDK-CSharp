@@ -536,7 +536,7 @@ namespace MbientLab.MetaWear.Impl {
             Exception error = null;
             OrderedDictionary info = null;
             try {
-                info = await DiscoverModulesAsync(ignore);
+                info = await DiscoverModulesAsync(ignore, null);
             } catch (TaskTimeoutException e) {
                 error = e.InnerException;
                 info = e.PartialResult as OrderedDictionary;
@@ -676,7 +676,7 @@ namespace MbientLab.MetaWear.Impl {
         }
 #endif
 
-        public async Task InitializeAsync() {
+        public async Task InitializeAsync(Action<string, double> progress_cb) {
             if (persistent.attributes == null) {
                 Stream ins = null;
                 try {
@@ -697,17 +697,21 @@ namespace MbientLab.MetaWear.Impl {
                     if (ins != null) ins.Dispose();
                 }
             }
+            progress_cb("LoadLocal", 0.10);
 
             Exception error = null;
             try {
                 await gatt.DiscoverServicesAsync();
+                progress_cb("Services Discovered", 0.15);
 
                 if (persistent.attributes.hardwareRevision == null) {
                     persistent.attributes.hardwareRevision = Encoding.ASCII.GetString(await gatt.ReadCharacteristicAsync(DeviceInformationService.HARDWARE_REVISION));
                 }
+                progress_cb("Loaded HW", 0.20);
                 if (persistent.attributes.modelNumber == null) {
                     persistent.attributes.modelNumber = Encoding.ASCII.GetString(await gatt.ReadCharacteristicAsync(DeviceInformationService.MODEL_NUMBER));
                 }
+                progress_cb("Loaded Model#", 0.25);
 
                 var firmware = new Version(Encoding.ASCII.GetString(await gatt.ReadCharacteristicAsync(DeviceInformationService.FIRMWARE_REVISION)));
                 await gatt.EnableNotificationsAsync(NOTIFY_CHAR, value => {
@@ -725,6 +729,7 @@ namespace MbientLab.MetaWear.Impl {
                     }
                 });
                 InMetaBootMode = false;
+                progress_cb("Notify Enabled", 0.30);
 
                 if (persistent.attributes.firmware == null || persistent.attributes.firmware.CompareTo(firmware) != 0) {
                     persistent.id = 0;
@@ -739,7 +744,7 @@ namespace MbientLab.MetaWear.Impl {
                 }
                 persistent.attributes.firmware = firmware;
 
-                var info = await DiscoverModulesAsync(persistent.attributes.moduleInfo.Keys);
+                var info = await DiscoverModulesAsync(persistent.attributes.moduleInfo.Keys, progress_cb);
                 foreach (var it in info.Keys) {
                     persistent.attributes.moduleInfo.Add((Module)it, (ModuleInfo)info[it]);
                     instantiateModule((Module)it, (ModuleInfo)info[it]);
@@ -774,16 +779,23 @@ namespace MbientLab.MetaWear.Impl {
         }
 
         private TimedTask<ModuleInfo> readInfoRegisterTask;
-        private async Task<OrderedDictionary> DiscoverModulesAsync(ICollection<Module> ignore) {
+        private async Task<OrderedDictionary> DiscoverModulesAsync(ICollection<Module> ignore, Action<string, double> progress_cb) {
             var output = new OrderedDictionary();
             readInfoRegisterTask = new TimedTask<ModuleInfo>();
 
+            var i = 1;
             try {
                 foreach (Module module in Enum.GetValues(typeof(Module))) {
                     if (!ignore.Contains(module)) {
                         var info = await readInfoRegisterTask.Execute("Did not receive module info (" + module.ToString() + ") within {0}ms", bridge.TimeForResponse,
                             () => bridge.sendCommand(new byte[] { (byte)module, READ_INFO_REGISTER }));
                         output.Add(module, info);
+
+                        if (progress_cb != null)
+                        {
+                            progress_cb("Loaded: " + module.ToString(), 0.30 + 0.70 * (i++ / 13));
+
+                        }
                     }
                 }
             } catch (TimeoutException e) {

@@ -136,30 +136,28 @@ namespace MbientLab.MetaWear.Impl {
                 }
             }
 
-            public void ClearOutput() {
-                bridge.sendCommand(new byte[] { (byte) GPIO, CLEAR_DO, pin });
+            public Task ClearOutput() {
+                return bridge.sendCommand(new byte[] { (byte) GPIO, CLEAR_DO, pin });
             }
 
-            public void SetChangeType(PinChangeType type) {
-                bridge.sendCommand(new byte[] { (byte) GPIO, PIN_CHANGE, pin, (byte)(type + 1) });
+            public Task SetChangeType(PinChangeType type) {
+                return bridge.sendCommand(new byte[] { (byte) GPIO, PIN_CHANGE, pin, (byte)(type + 1) });
             }
 
-            public void SetOutput() {
-                bridge.sendCommand(new byte[] { (byte) GPIO, SET_DO, pin });
+            public Task SetOutput() {
+                return bridge.sendCommand(new byte[] { (byte) GPIO, SET_DO, pin });
             }
 
-            public void SetPullMode(PullMode mode) {
+            public Task SetPullMode(PullMode mode) {
                 switch (mode) {
                     case PullMode.Up:
-                        bridge.sendCommand(new byte[] { (byte) GPIO, PULL_UP_DI, pin });
-                        break;
+                        return bridge.sendCommand(new byte[] { (byte) GPIO, PULL_UP_DI, pin });
                     case PullMode.Down:
-                        bridge.sendCommand(new byte[] { (byte) GPIO, PULL_DOWN_DI, pin });
-                        break;
+                        return bridge.sendCommand(new byte[] { (byte) GPIO, PULL_DOWN_DI, pin });
                     case PullMode.None:
-                        bridge.sendCommand(new byte[] { (byte) GPIO, NO_PULL_DI, pin });
-                        break;
+                        return bridge.sendCommand(new byte[] { (byte) GPIO, NO_PULL_DI, pin });
                 }
+                return Task.CompletedTask;
             }
         }
 

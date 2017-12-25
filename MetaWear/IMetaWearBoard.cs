@@ -75,7 +75,7 @@ namespace MbientLab.MetaWear {
         /// <returns>Null once the SDK is initialized</returns>
         /// <exception cref="TimeoutException">If initialization takes too long, timeout can be increased with the <see cref="TimeForResponse"/> property</exception>
         /// <exception cref="InvalidOperationException">If the host device failed to establish a connection</exception>
-        Task InitializeAsync();
+        Task InitializeAsync(Action<string, double> progress_cb);
 #if NETSTANDARD2_0
         /// <summary>
         /// Disconnects from the MetaWear device

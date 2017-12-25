@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Peripheral.Gpio;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Peripheral {
     namespace Gpio {
@@ -67,20 +68,20 @@ namespace MbientLab.MetaWear.Peripheral {
             /// Set the pin change type to look for
             /// </summary>
             /// <param name="type">New pin change type</param>
-            void SetChangeType(PinChangeType type);
+            Task SetChangeType(PinChangeType type);
             /// <summary>
             /// Set the pin pull mode
             /// </summary>
             /// <param name="mode">New pull mode</param>
-            void SetPullMode(PullMode mode);
+            Task SetPullMode(PullMode mode);
             /// <summary>
             /// Clear the pin's output voltage i.e. logical low
             /// </summary>
-            void ClearOutput();
+            Task ClearOutput();
             /// <summary>
             /// Set the pin's output voltage i.e. logical high
             /// </summary>
-            void SetOutput();
+            Task SetOutput();
         }
         /// <summary>
         /// Represents a virtual pin used by the <see cref="IAnalogDataProducer.Read(byte, byte, ushort, byte)"/> function
