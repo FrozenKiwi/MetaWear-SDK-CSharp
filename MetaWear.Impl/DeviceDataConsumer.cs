@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [KnownType(typeof(DataTypeBase))]
@@ -20,7 +21,7 @@ namespace MbientLab.MetaWear.Impl {
             subscriber?.Invoke(data);
         }
 
-        public abstract void enableStream(IModuleBoardBridge bridge);
+        public abstract Task enableStream(IModuleBoardBridge bridge);
         public abstract void disableStream(IModuleBoardBridge bridge);
         public abstract void addDataHandler(IModuleBoardBridge bridge);
     }

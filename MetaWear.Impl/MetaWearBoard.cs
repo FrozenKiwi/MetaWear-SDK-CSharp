@@ -467,7 +467,7 @@ namespace MbientLab.MetaWear.Impl {
                 return null;
             }
         }
-        public int TimeForResponse { set => timeForResponse = Math.Max(0, Math.Min(value, 1000)); }
+        public int TimeForResponse { set => timeForResponse = Math.Max(0, Math.Min(value, 3000)); }
         public bool IsConnected { get; private set; }
 
         public MetaWearBoard(IBluetoothLeGatt gatt, ILibraryIO io) {
@@ -675,6 +675,11 @@ namespace MbientLab.MetaWear.Impl {
             await gatt.DisconnectAsync();
         }
 #endif
+
+        public Task InitializeAsync()
+        {
+            return InitializeAsync(null);
+        }
 
         public async Task InitializeAsync(Action<string, double> progress_cb) {
             if (persistent.attributes == null) {
@@ -1106,17 +1111,21 @@ namespace MbientLab.MetaWear.Impl {
                     }
 
                     List<DeviceDataConsumer> consumers = new List<DeviceDataConsumer>();
-                    top.Item2.state.subscribedProducers.ForEach(producer => {
+                    //var enableTasks = top.Item2.state.subscribedProducers.Select(producer => { 
+                    //top.Item2.state.subscribedProducers.ForEach(async producer => {
+                    // Note: Don't use LINQ to trigger async actions.  It is equivalent
+                    // to calling async void functions.
+                    foreach (var producer in top.Item2.state.subscribedProducers) { 
                         if (logConsumers != null && producer.Item3) {
                             var logger = logConsumers.Dequeue();
                             logger.subscriber = producer.Item2;
                             consumers.Add(logger);
                         } else {
                             StreamedDataConsumer newConsumer = new StreamedDataConsumer(producer.Item1, producer.Item2);
-                            newConsumer.enableStream(bridge);
+                            await newConsumer.enableStream(bridge);
                             consumers.Add(newConsumer);
                         }
-                    });
+                    }
 
                     pendingRoutes.Dequeue();
 

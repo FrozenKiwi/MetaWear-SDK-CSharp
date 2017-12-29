@@ -9,11 +9,11 @@ namespace MbientLab.MetaWear.Impl {
 
         internal TimedTask() { }
 
-        internal async Task<T> Execute(string format, int timeout, Action action) {
+        internal async Task<T> Execute(string format, int timeout, Func<Task> action) {
             taskSource = new TaskCompletionSource<T>();
             cts = new CancellationTokenSource();
 
-            action();
+            await action();
             if (timeout != 0) {
                 // use task timeout pattern from https://stackoverflow.com/a/11191070
                 var delay = Task.Delay(timeout, cts.Token);

@@ -19,16 +19,25 @@ namespace MetaWear.NetStandard
         private IDevice device;
         private object connection;
         private ConcurrentDictionary<CharIdent, IGattCharacteristic> characteristics;
-       
+
+
+        public static Action<string /*category*/, string /*message*/, int /*severity*/> BleLogging;
+        public static int LogLevel
+        {
+            get { return (int)Log.MinLogLevel; }
+            set { Log.MinLogLevel = (Plugin.BluetoothLE.LogLevel)value; }
+        }
+
+#if _ANDROID
+        public AndroidPerformActionsOnMainThread => CrossBleAdapter.AndroidPerformActionsOnMainThread;
+#endif
+
         public BLEBridge(MWDevice mwdevice)
         {
             device = mwdevice.device;
-            Log.MinLogLevel = LogLevel.Debug;
             Log.Out = (string s, string msg, LogLevel level) =>
             {
-                // TODO: Proper logging?
-                var threadId = Thread.CurrentThread.ManagedThreadId;
-                System.Diagnostics.Debug.WriteLine("{0} - {1}: {2}", threadId, level, msg);
+                BleLogging?.Invoke(s, msg, (int)level);
             };
         }
 
@@ -40,10 +49,7 @@ namespace MetaWear.NetStandard
             //{
             //    characteristics.TryAdd(new CharIdent(ch.Service.Uuid, ch.Uuid), ch);
             //});
-            //await Task.Delay(10000);
-            System.Diagnostics.Debug.WriteLine("Finished");
         }
-
 
         internal async Task connectToDevice()
         {
@@ -88,13 +94,12 @@ namespace MetaWear.NetStandard
         {
             IGattCharacteristic result = null;
             // NOTE - caching the characteristics breaks notifications (streaming doesn't work).
-            //if (!characteristics.TryGetValue(gattChar, out result))
-            //{
+            if (!characteristics.TryGetValue(gattChar, out result))
+            {
                 IGattService service = await device.GetKnownService(gattChar.Item1);
                 result = await service.GetKnownCharacteristics(gattChar.Item2);
-            //    result.WhenWritten
             //    characteristics.TryAdd(gattChar, result);
-            //}
+            }
             return result;
         }
 
@@ -134,14 +139,6 @@ namespace MetaWear.NetStandard
             return service != null;
         }
 
-        public static string ByteArrayToString(byte[] ba)
-        {
-            System.Text.StringBuilder hex = new System.Text.StringBuilder(ba.Length * 2);
-            foreach (byte b in ba)
-                hex.AppendFormat("{0:x2}", b);
-            return hex.ToString();
-        }
-
         public async Task WriteCharacteristicAsync(Tuple<Guid, Guid> gattChar, GattCharWriteType writeType, byte[] value)
         {
             var ch = await GetGattCharacteristic(gattChar);
@@ -150,16 +147,16 @@ namespace MetaWear.NetStandard
             
             if (writeType == GattCharWriteType.WRITE_WITH_RESPONSE || !canWriteSansResp)
             {
-                Log.Write("chwr", "RespWriting: " + ByteArrayToString(value));
+                //Log.Debug("chwr", "RespWriting: " + ByteArrayToString(value));
                 var results = await ch.Write(value);
                 if (results.Data != value)
                 {
-                    Log.Write("chwr", "Writing Failed: " + ByteArrayToString(results.Data));
+                    //Log.Debug("chwr", "Writing Failed: " + ByteArrayToString(results.Data));
                 }
             }
             else
             {
-                Log.Write("chwr", "Writing: " + ByteArrayToString(value));
+                //Log.Debug("chwr", "Writing: " + ByteArrayToString(value));
                 ch.WriteWithoutResponse(value);
             }
         }

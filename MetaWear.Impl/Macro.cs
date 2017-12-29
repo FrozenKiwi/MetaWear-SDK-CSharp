@@ -31,9 +31,9 @@ namespace MbientLab.MetaWear.Impl {
         public async Task<byte> EndRecordAsync() {
             await Task.Delay(WRITE_MACRO_DELAY);
             var id = await beginMacroTask.Execute("Did not receive macro id within {0}ms", bridge.TimeForResponse, 
-                () => {
+                async () => {
                     isRecording = false;
-                    bridge.sendCommand(new byte[] { (byte)MACRO, BEGIN, (byte)(execOnBoot ? 1 : 0) });
+                    await bridge.sendCommand(new byte[] { (byte)MACRO, BEGIN, (byte)(execOnBoot ? 1 : 0) });
                 });
 
             foreach (var it in commands) {

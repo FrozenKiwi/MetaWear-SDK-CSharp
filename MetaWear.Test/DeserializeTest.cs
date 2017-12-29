@@ -33,7 +33,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "scheduled_task";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
             metawear.LookupScheduledTask(0).Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
@@ -48,7 +48,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "observer_rev2";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
             var observer = metawear.LookupObserver(0);
 
             observer.Remove();
@@ -65,7 +65,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "gpio_analog";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             var gpio = metawear.GetModule<IGpio>();
 
@@ -80,7 +80,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "i2c_stream";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             var i2c = metawear.GetModule<ISerialPassthrough>().I2C(0xa, 0x1);
             i2c.Read(0x1c, 0xd);
@@ -110,7 +110,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "gpio_feedback";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
             metawear.LookupRoute(0).Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
@@ -124,7 +124,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "multi_comparator";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             metawear.GetModule<IDataProcessor>().Edit<IComparatorEditor>("multi_comp").Modify(Builder.Comparison.Lt, 128, 256);
 
@@ -137,7 +137,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "spi_stream";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             var spi = metawear.GetModule<ISerialPassthrough>().SPI(0xe, 0x5);
             spi.Read(10, 0, 11, 7, 3, SpiFrequency._8_MHz, lsbFirst: false, data: new byte[] { 0xda });
@@ -153,7 +153,7 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "temperature";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             var sensor = metawear.GetModule<ITemperature>().Sensors[0x3];
             sensor.Read();
@@ -166,7 +166,7 @@ namespace MbientLab.MetaWear.Test {
             // Tests that object references are preserved in serialization
             platform.fileSuffix = "bmi160_acc_route";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync();
+            await metawear.InitializeAsync(null);
 
             Acceleration expected = new Acceleration(
                     BitConverter.ToSingle(new byte[] { 0x00, 0xa8, 0xef, 0xbf }, 0),

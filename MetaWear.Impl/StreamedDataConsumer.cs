@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.Serialization;
 using MbientLab.MetaWear.Core;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -12,19 +13,19 @@ namespace MbientLab.MetaWear.Impl {
         public StreamedDataConsumer(DataTypeBase source, Action<IData> subscriber) : base(source, subscriber) { 
         }
 
-        public override void enableStream(IModuleBoardBridge bridge) {
+        public override async Task enableStream(IModuleBoardBridge bridge) {
             addDataHandler(bridge);
 
             if ((source.eventConfig[1] & 0x80) == 0x0) {
                 if (source.eventConfig[2] == DataTypeBase.NO_ID) {
                     if (bridge.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                        bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x1 });
+                        await bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x1 });
                     }
                 } else {
-                    bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x1 });
+                    await bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x1 });
                     if (bridge.numDataHandlers(source.eventConfigAsTuple()) == 1) {
                         if (source.eventConfig[0] == (byte) Module.DATA_PROCESSOR && source.eventConfig[1] == DataProcessor.NOTIFY) {
-                            bridge.sendCommand(new byte[] { source.eventConfig[0], DataProcessor.NOTIFY_ENABLE, source.eventConfig[2], 0x1 });
+                            await bridge.sendCommand(new byte[] { source.eventConfig[0], DataProcessor.NOTIFY_ENABLE, source.eventConfig[2], 0x1 });
                         }
                     }
                 }

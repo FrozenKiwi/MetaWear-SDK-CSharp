@@ -21,9 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaWear.DotNetStandard", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BluetoothLE", "BluetoothLE", "{4BD28E8E-8BF6-4467-B828-E20344FA88AC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE", "..\..\tadevelopment\baby_monitor2\orrinityapp\bluetoothle\Plugin.BluetoothLE\Plugin.BluetoothLE.csproj", "{56089508-E873-43CF-B7A5-30439FCFC54D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE", "..\bluetoothle\Plugin.BluetoothLE\Plugin.BluetoothLE.csproj", "{56089508-E873-43CF-B7A5-30439FCFC54D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE.Abstractions", "..\..\tadevelopment\baby_monitor2\orrinityapp\bluetoothle\Plugin.BluetoothLE.Abstractions\Plugin.BluetoothLE.Abstractions.csproj", "{947F585B-90A4-43D7-B98F-4CC4B3491022}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE.Abstractions", "..\bluetoothle\Plugin.BluetoothLE.Abstractions\Plugin.BluetoothLE.Abstractions.csproj", "{947F585B-90A4-43D7-B98F-4CC4B3491022}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

@@ -44,9 +44,9 @@ namespace MbientLab.MetaWear.Impl {
                     ActiveDataType = null;
 
                     while (recordedCommands.Count != 0) {
-                        var id = await createEventTask.Execute("Programming command timed out after {0}ms", bridge.TimeForResponse * 2, () => {
-                            bridge.sendCommand(recordedCommands.Dequeue());
-                            bridge.sendCommand(recordedCommands.Dequeue());
+                        var id = await createEventTask.Execute("Programming command timed out after {0}ms", bridge.TimeForResponse * 2, async () => {
+                            await bridge.sendCommand(recordedCommands.Dequeue());
+                            await bridge.sendCommand(recordedCommands.Dequeue());
                         });
 
                         successfulEvents.Enqueue(id);

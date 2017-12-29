@@ -105,7 +105,7 @@ namespace MbientLab.MetaWear.Test {
             gyro.Configure(range: DataRange._250dps);
             var route = await gyro.AngularVelocity.AddRouteAsync(source => source.Split().Index(1).Log(data => actual[i++] = data.Value<float>()));
 
-            logging.DownloadAsync();
+            await logging.DownloadAsync();
             platform.ReadFile("bmi160_gyro_yaxis_dl", line => platform.sendMockResponse(JsonConvert.DeserializeObject<byte[]>(line)));
 
             Assert.That(actual, Is.EqualTo(expected).Within(0.001f));

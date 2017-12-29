@@ -59,7 +59,7 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public override void enableStream(IModuleBoardBridge bridge) { }
+        public override async Task enableStream(IModuleBoardBridge bridge) { }
 
         public override void disableStream(IModuleBoardBridge bridge) { }
 
