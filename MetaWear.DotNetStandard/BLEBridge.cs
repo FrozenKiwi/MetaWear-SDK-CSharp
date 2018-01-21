@@ -18,6 +18,7 @@ namespace MetaWear.NetStandard
     {
         private IDevice device;
         private object connection;
+        IDisposable _notification;
         private ConcurrentDictionary<CharIdent, IGattCharacteristic> characteristics;
 
 
@@ -60,15 +61,8 @@ namespace MetaWear.NetStandard
                     case ConnectionStatus.Disconnected:
                         _notification?.Dispose();
                         _notification = null;
-                        if (dcTaskSource != null)
-                        {
-                            dcTaskSource.TrySetResult(true);
-                            OnDisconnect?.Invoke();
-                        }
-                        else
-                        {
-                            OnDisconnect?.Invoke();
-                        }
+                        connection = null;
+                        OnDisconnect?.Invoke();
                         break;
                 };
             });
@@ -94,7 +88,7 @@ namespace MetaWear.NetStandard
         {
             IGattCharacteristic result = null;
             // NOTE - caching the characteristics breaks notifications (streaming doesn't work).
-            if (!characteristics.TryGetValue(gattChar, out result))
+            //if (!characteristics.TryGetValue(gattChar, out result))
             {
                 IGattService service = await device.GetKnownService(gattChar.Item1);
                 result = await service.GetKnownCharacteristics(gattChar.Item2);
@@ -103,7 +97,6 @@ namespace MetaWear.NetStandard
             return result;
         }
 
-        IDisposable _notification;
         public async Task EnableNotificationsAsync(Tuple<Guid, Guid> gattChar, Action<byte[]> handler)
         {
             var ch = await GetGattCharacteristic(gattChar);
@@ -123,14 +116,6 @@ namespace MetaWear.NetStandard
                 return res.Data;
             }
             return new byte[0];
-        }
-
-        private TaskCompletionSource<bool> dcTaskSource;
-        public Task<bool> RemoteDisconnectAsync()
-        {
-            // Copied from Win10 implementation
-            dcTaskSource = new TaskCompletionSource<bool>();
-            return dcTaskSource.Task;
         }
 
         public async Task<bool> ServiceExistsAsync(Guid serviceGuid)

@@ -54,29 +54,20 @@ namespace MetaWear.NetStandard
         /// <param name="device">BluetoothLE device object corresponding to the target MetaWear board</param>
         /// <returns><see cref="IMetaWearBoard"/> object</returns>
         public static IMetaWearBoard GetMetaWearBoard(MWDevice device) {
-            if (btleDevices.TryGetValue(device.Name, out var board)) {
-                return board;
-            }
+            //if (btleDevices.TryGetValue(device.MacAddress, out var board)) {
+            //    return board;
+           // }
 
-            board = new MetaWearBoard(new BLEBridge(device), new IO(device.Name));
-            btleDevices.Add(device.Name, board);
+            var board = new MetaWearBoard(new BLEBridge(device), new IO(device.Name));
+            //btleDevices.Add(device.MacAddress, board);
             return board;
         }
         /// <summary>
         /// Removes the <see cref="IMetaWearBoard"/> object corresponding to the BluetoothLE device
         /// </summary>
         /// <param name="device">BluetoothLE device object corresponding to the target MetaWear board</param>
-        public static void RemoveMetaWearBoard(IDevice device) {
-            btleDevices.Remove(device.Name);
-        }
-        /// <summary>
-        /// Clears cached information specific to the BluetoothLE device
-        /// </summary>
-        /// <param name="device">BluetoothLE device to clear</param>
-        /// <returns>Null task</returns>
-        public static Task ClearDeviceCacheAsync(IDevice device) {
-            var macAddr = device.Name;
-            return Task.CompletedTask;
+        public static void RemoveMetaWearBoard(IMetaWearBoard device) {
+            //btleDevices.Remove(device.MacAddress);
         }
     }
 }

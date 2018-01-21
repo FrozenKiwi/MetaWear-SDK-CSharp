@@ -710,11 +710,13 @@ namespace MbientLab.MetaWear.Impl {
                 progress_cb("Services Discovered", 0.15);
 
                 if (persistent.attributes.hardwareRevision == null) {
-                    persistent.attributes.hardwareRevision = Encoding.ASCII.GetString(await gatt.ReadCharacteristicAsync(DeviceInformationService.HARDWARE_REVISION));
+                    var hwrev = await gatt.ReadCharacteristicAsync(DeviceInformationService.HARDWARE_REVISION);
+                    persistent.attributes.hardwareRevision = Encoding.ASCII.GetString(hwrev);
                 }
                 progress_cb("Loaded HW", 0.20);
                 if (persistent.attributes.modelNumber == null) {
-                    persistent.attributes.modelNumber = Encoding.ASCII.GetString(await gatt.ReadCharacteristicAsync(DeviceInformationService.MODEL_NUMBER));
+                    var modelNum = await gatt.ReadCharacteristicAsync(DeviceInformationService.MODEL_NUMBER);
+                    persistent.attributes.modelNumber = Encoding.ASCII.GetString(modelNum);
                 }
                 progress_cb("Loaded Model#", 0.25);
 

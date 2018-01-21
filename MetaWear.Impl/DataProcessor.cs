@@ -55,10 +55,7 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        internal class ProcessorEntry {
-            internal byte id, offset, length;
-            internal byte[] source, config;
-        }
+
 
         internal const byte TYPE_ACCOUNTER = 0x11, TYPE_PACKER = 0x10;
         internal const byte TIME_PASSTHROUGH_REVISION = 1, ENHANCED_STREAMING_REVISION = 2, HPF_REVISION = 2, EXPANDED_DELAY = 2;
@@ -218,6 +215,13 @@ namespace MbientLab.MetaWear.Impl {
             }
 
             return entries;
+        }
+
+        public async Task<int> DoPullChainAsync(byte id)
+        {
+            var chain = await pullChainAsync(id);
+
+            return chain.Count;
         }
     }
 }

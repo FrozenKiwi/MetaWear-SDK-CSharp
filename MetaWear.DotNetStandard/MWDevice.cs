@@ -17,6 +17,8 @@ namespace MetaWear.NetStandard
 
         public Guid Uuid => device.Uuid;
 
+        public string MacAddress => "Todo";
+
         public MWDevice(IDevice device)
         {
             this.device = device;

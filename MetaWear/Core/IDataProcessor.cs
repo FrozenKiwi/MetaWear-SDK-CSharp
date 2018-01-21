@@ -1,5 +1,7 @@
 ﻿using MbientLab.MetaWear.Builder;
 using MbientLab.MetaWear.Core.DataProcessor;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Core {
     namespace DataProcessor {
@@ -167,6 +169,12 @@ namespace MbientLab.MetaWear.Core {
         }
     }
 
+    public class ProcessorEntry
+    {
+        internal byte id, offset, length;
+        internal byte[] source, config;
+    }
+
     /// <summary>
     /// Firmware feature that manipulates data on-board
     /// </summary>
@@ -184,5 +192,7 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="name">Processor name to look up, set by <see cref="IRouteComponent.Name(string)"/></param>
         /// <returns>Data producer object, null if the processor does not have an internal state</returns>
         IForcedDataProducer State(string name);
+
+        Task<int> DoPullChainAsync(byte id);
     }
 }
