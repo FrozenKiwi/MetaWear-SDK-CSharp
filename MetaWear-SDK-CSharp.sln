@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2003
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MetaWear", "MetaWear\MetaWear.shproj", "{ECC695E9-A3AE-49DB-B66C-911AB5842D0A}"
 EndProject
@@ -18,12 +18,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MetaWear.Platform", "MetaWear.Platform\MetaWear.Platform.shproj", "{345A43DC-B35D-4B53-B263-D0DFECCF2050}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaWear.DotNetStandard", "MetaWear.DotNetStandard\MetaWear.DotNetStandard.csproj", "{CB9B2162-4B0A-44AF-91AF-98F725FA7656}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BluetoothLE", "BluetoothLE", "{4BD28E8E-8BF6-4467-B828-E20344FA88AC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE", "..\bluetoothle\Plugin.BluetoothLE\Plugin.BluetoothLE.csproj", "{56089508-E873-43CF-B7A5-30439FCFC54D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.BluetoothLE.Abstractions", "..\bluetoothle\Plugin.BluetoothLE.Abstractions\Plugin.BluetoothLE.Abstractions.csproj", "{947F585B-90A4-43D7-B98F-4CC4B3491022}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -115,45 +109,9 @@ Global
 		{CB9B2162-4B0A-44AF-91AF-98F725FA7656}.Release|x64.Build.0 = Release|Any CPU
 		{CB9B2162-4B0A-44AF-91AF-98F725FA7656}.Release|x86.ActiveCfg = Release|Any CPU
 		{CB9B2162-4B0A-44AF-91AF-98F725FA7656}.Release|x86.Build.0 = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|ARM.Build.0 = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|x64.Build.0 = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Debug|x86.Build.0 = Debug|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|ARM.ActiveCfg = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|ARM.Build.0 = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|x64.ActiveCfg = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|x64.Build.0 = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|x86.ActiveCfg = Release|Any CPU
-		{56089508-E873-43CF-B7A5-30439FCFC54D}.Release|x86.Build.0 = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|ARM.Build.0 = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|x64.Build.0 = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Debug|x86.Build.0 = Debug|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|Any CPU.Build.0 = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|ARM.ActiveCfg = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|ARM.Build.0 = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|x64.ActiveCfg = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|x64.Build.0 = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|x86.ActiveCfg = Release|Any CPU
-		{947F585B-90A4-43D7-B98F-4CC4B3491022}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{56089508-E873-43CF-B7A5-30439FCFC54D} = {4BD28E8E-8BF6-4467-B828-E20344FA88AC}
-		{947F585B-90A4-43D7-B98F-4CC4B3491022} = {4BD28E8E-8BF6-4467-B828-E20344FA88AC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D6468787-33CB-4041-A000-7D7BAB3E8700}

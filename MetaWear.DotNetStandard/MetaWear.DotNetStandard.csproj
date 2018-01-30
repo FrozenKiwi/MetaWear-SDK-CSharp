@@ -16,12 +16,8 @@
   <Import Project="..\MetaWear.Platform\MetaWear.Platform.projitems" Label="Shared" />
 
   <ItemGroup>
+    <PackageReference Include="Plugin.BluetoothLE" Version="5.3.1" />
     <PackageReference Include="ReactiveUI" Version="8.0.0-alpha0117" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\bluetoothle\Plugin.BluetoothLE.Abstractions\Plugin.BluetoothLE.Abstractions.csproj" />
-    <ProjectReference Include="..\..\bluetoothle\Plugin.BluetoothLE\Plugin.BluetoothLE.csproj" />
   </ItemGroup>
 
 </Project>
