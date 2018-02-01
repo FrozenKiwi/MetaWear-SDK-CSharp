@@ -192,7 +192,7 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="maxConnInterval">Upper bound of the connection interval, max 4000ms</param>
         /// <param name="slaveLatency">Number of connection intervals to skip, between [0, 1000]</param>
         /// <param name="supervisorTimeout">Maximum amount of time between data exchanges until the connection is considered to be lost, between [10, 32000] ms</param>
-        void EditBleConnParams(float minConnInterval = 7.5f, float maxConnInterval = 125f, ushort slaveLatency = 0, ushort supervisorTimeout = 6000);
+        Task EditBleConnParams(float minConnInterval = 7.5f, float maxConnInterval = 125f, ushort slaveLatency = 0, ushort supervisorTimeout = 6000);
         /// <summary>
         /// Edit the ble advertising configuration
         /// </summary>
@@ -201,11 +201,11 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="interval">How long to advertise for, between [0, 180] seconds where 0 indicates no timeout</param>
         /// <param name="txPower">Transmitting power, one of: 4, 0, -4, -8, -12, -16, -20, -30</param>
         /// <param name="scanResponse">Custom scan response packet</param>
-        void EditBleAdConfig(string name = null, byte? timeout = null, ushort? interval = null, sbyte? txPower = null, byte[] scanResponse = null);
+        Task EditBleAdConfig(string name = null, byte? timeout = null, ushort? interval = null, sbyte? txPower = null, byte[] scanResponse = null);
         /// <summary>
         /// Starts ble advertising
         /// </summary>
-        void StartBleAdvertising();
+        Task StartBleAdvertising();
 
         /// <summary>
         /// Programs a task to the board that will be executed when a disconnect occurs

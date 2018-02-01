@@ -21,9 +21,12 @@ namespace MbientLab.MetaWear.Impl {
             logEntries.Add(id, new Queue<byte[]>());
         }
 
-        public void remove(IModuleBoardBridge bridge, bool sync) {
+        public async Task remove(IModuleBoardBridge bridge, bool sync) {
             Logging logging = bridge.GetModule<ILogging>() as Logging;
-            orderedIds.ForEach(id => logging.Remove(id, sync));
+            foreach (var id in orderedIds)
+            {
+                await logging.Remove(id, sync);
+            }
         }
 
         internal void register(Dictionary<byte, LoggedDataConsumer> loggers) {
@@ -59,11 +62,11 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public override async Task enableStream(IModuleBoardBridge bridge) { }
+        public override Task enableStream(IModuleBoardBridge bridge) { return Task.CompletedTask; }
 
-        public override void disableStream(IModuleBoardBridge bridge) { }
+        public override Task disableStream(IModuleBoardBridge bridge) { return Task.CompletedTask; }
 
-        public override void addDataHandler(IModuleBoardBridge bridge) { }
+        public override Task addDataHandler(IModuleBoardBridge bridge) { return Task.CompletedTask; }
     }
 
     [DataContract]
@@ -106,8 +109,8 @@ namespace MbientLab.MetaWear.Impl {
         public Logging(IModuleBoardBridge bridge) : base(bridge) {
         }
 
-        public override void tearDown() {
-            bridge.sendCommand(new byte[] { (byte)LOGGING, REMOVE_ALL });
+        public override async Task tearDown() {
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, REMOVE_ALL });
             dataLoggers.Clear();
         }
 
@@ -185,7 +188,7 @@ namespace MbientLab.MetaWear.Impl {
                     queryTimeTask = null;
                 }
             });
-            bridge.addRegisterResponseHandler(Tuple.Create((byte)LOGGING, Util.setRead(LENGTH)), response => {
+            bridge.addRegisterResponseHandler(Tuple.Create((byte)LOGGING, Util.setRead(LENGTH)), async response => {
                 int payloadSize = response.Length - 2;
                 nLogEntries = BitConverter.ToUInt32(response, 2);
 
@@ -203,7 +206,7 @@ namespace MbientLab.MetaWear.Impl {
                     Array.Copy(response, 2, command, 0, payloadSize);
                     Array.Copy(BitConverter.GetBytes(nEntriesNotify), 0, command, payloadSize, sizeof(uint));
                     
-                    bridge.sendCommand(LOGGING, READOUT, command);
+                    await bridge.sendCommand(LOGGING, READOUT, command);
                 }
             });
 
@@ -212,8 +215,8 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public void ClearEntries() {
-            bridge.sendCommand(new byte[] { (byte) LOGGING, REMOVE_ENTRIES, 0xff, 0xff, 0xff, 0xff });
+        public Task ClearEntries() {
+            return bridge.sendCommand(new byte[] { (byte) LOGGING, REMOVE_ENTRIES, 0xff, 0xff, 0xff, 0xff });
         }
 
         private uint nLogEntries, nUpdates;
@@ -221,9 +224,9 @@ namespace MbientLab.MetaWear.Impl {
         private Action<uint, uint> updateHandler;
         private Action<LogDownloadError, byte, DateTime, byte[]> errorHandler;
 
-        public Task DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
+        public async Task<bool> DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
             if (downloadTask != null) {
-                return downloadTask.Task;
+                return await downloadTask.Task;
             }
 
             this.nUpdates = nUpdates;
@@ -231,35 +234,35 @@ namespace MbientLab.MetaWear.Impl {
             this.errorHandler = errorHandler;
 
             if (bridge.lookupModuleInfo(LOGGING).revision >= REVISION_EXTENDED_LOGGING) {
-                bridge.sendCommand(new byte[] { (byte) LOGGING, READOUT_PAGE_COMPLETED, 1 });
+                await bridge.sendCommand(new byte[] { (byte) LOGGING, READOUT_PAGE_COMPLETED, 1 });
             }
-            bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_NOTIFY, 1 });
-            bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_PROGRESS, 1 });
-            bridge.sendCommand(new byte[] { (byte)LOGGING, Util.setRead(LENGTH) });
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_NOTIFY, 1 });
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_PROGRESS, 1 });
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, Util.setRead(LENGTH) });
 
             downloadTask = new TaskCompletionSource<bool>();
-            return downloadTask.Task;
+            return await downloadTask.Task;
         }
 
-        public Task DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler) {
+        public Task<bool> DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler) {
             return DownloadAsync(nUpdates, updateHandler, null);
         }
 
-        public Task DownloadAsync(Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
+        public Task<bool> DownloadAsync(Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
             return DownloadAsync(0, null, errorHandler);
         }
 
-        public Task DownloadAsync() {
+        public Task<bool> DownloadAsync() {
             return DownloadAsync(0, null, null);
         }
 
-        public void Start(bool overwrite = false) {
-            bridge.sendCommand(new byte[] { (byte)LOGGING, CIRCULAR_BUFFER, (byte)(overwrite ? 1 : 0) });
-            bridge.sendCommand(new byte[] { (byte)LOGGING, ENABLE, 1 });
+        public async Task Start(bool overwrite = false) {
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, CIRCULAR_BUFFER, (byte)(overwrite ? 1 : 0) });
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, ENABLE, 1 });
         }
 
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte)LOGGING, ENABLE, 0 });
+        public async Task Stop() {
+            await bridge.sendCommand(new byte[] { (byte)LOGGING, ENABLE, 0 });
         }
 
         internal async Task QueryTimeAsync() {
@@ -268,10 +271,10 @@ namespace MbientLab.MetaWear.Impl {
                 () => bridge.sendCommand(new byte[] { (byte)LOGGING, Util.setRead(TIME) }));
         }
 
-        internal void Remove(byte id, bool sync) {
+        internal async Task Remove(byte id, bool sync) {
             dataLoggers.Remove(id);
             if (sync) {
-                bridge.sendCommand(new byte[] { (byte)LOGGING, REMOVE, id });
+                await bridge.sendCommand(new byte[] { (byte)LOGGING, REMOVE, id });
             }
         }
         internal async Task<Queue<LoggedDataConsumer>> CreateLoggersAsync(Queue<DataTypeBase> producers) {
@@ -304,9 +307,9 @@ namespace MbientLab.MetaWear.Impl {
                 return result;
             } catch (TimeoutException e) {
                 while (result.Count != 0) {
-                    result.Dequeue().remove(bridge, true);
+                    await result.Dequeue().remove(bridge, true);
                 }
-                nextLogger?.remove(bridge, true);
+                await nextLogger?.remove(bridge, true);
                 throw e;
             }
         }

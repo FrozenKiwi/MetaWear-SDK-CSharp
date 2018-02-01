@@ -48,12 +48,12 @@ namespace MbientLab.MetaWear.Test {
             new byte[] { 0b00111000, 0b00111001, 0b00111010, 0b00111011, 0b00111100, 0b00111101},
         };
         [TestCaseSource(typeof(AmbientLightLtr329TestDataClass), "ConfigureTestCases")]
-        public void Configure(Gain gain, IntegrationTime time, MeasurementRate rate) {
+        public async Task Configure(Gain gain, IntegrationTime time, MeasurementRate rate) {
             byte[][] expected =  {
                 new byte[] {0x14, 0x02, GAIN_BITMASKS[(int) gain], TIME_RATE_BITMASKS[(int) time][(int) rate]},
             };
 
-            als.Configure(gain: gain, time: time, rate: rate);
+            await als.Configure(gain: gain, time: time, rate: rate);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -81,7 +81,7 @@ namespace MbientLab.MetaWear.Test {
             };
 
             var route = await als.Illuminance.AddRouteAsync(source => source.Stream(null));
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

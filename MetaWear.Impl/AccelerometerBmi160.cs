@@ -51,13 +51,13 @@ namespace MbientLab.MetaWear.Impl {
             internal StepCounterDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(dataTypeBase, bridge) {
             }
 
-            public void Configure(StepDetectorMode Mode = StepDetectorMode.Normal) {
+            public Task Configure(StepDetectorMode Mode = StepDetectorMode.Normal) {
                 applyDetectorMode(config, Mode);
-                bridge.sendCommand(ACCELEROMETER, STEP_DETECTOR_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, STEP_DETECTOR_CONFIG, config);
             }
 
-            public void Reset() {
-                bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, STEP_COUNTER_RESET });
+            public Task Reset() {
+                return bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, STEP_COUNTER_RESET });
             }
         }
 
@@ -67,9 +67,9 @@ namespace MbientLab.MetaWear.Impl {
             internal StepDetectorDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(STEP_DETECTOR_INTERRUPT_ENABLE, 0x1, dataTypeBase, bridge) {
             }
 
-            public void Configure(StepDetectorMode Mode = StepDetectorMode.Normal) {
+            public Task Configure(StepDetectorMode Mode = StepDetectorMode.Normal) {
                 applyDetectorMode(config, Mode);
-                bridge.sendCommand(ACCELEROMETER, STEP_DETECTOR_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, STEP_DETECTOR_CONFIG, config);
             }
         }
 
@@ -79,12 +79,12 @@ namespace MbientLab.MetaWear.Impl {
 
             }
 
-            public override void Configure(ushort? hold = null, float? theta = null) {
-                Configure((FlatHoldTime) Util.closestIndexUShort(HOLD_TIMES, hold ?? 640), theta);
+            public override Task Configure(ushort? hold = null, float? theta = null) {
+                return Configure((FlatHoldTime) Util.closestIndexUShort(HOLD_TIMES, hold ?? 640), theta);
             }
 
-            public void Configure(FlatHoldTime? hold = null, float? theta = null) {
-                Write((byte) (hold ?? FlatHoldTime._640ms), theta ?? 5.6889f);
+            public Task Configure(FlatHoldTime? hold = null, float? theta = null) {
+                return Write((byte) (hold ?? FlatHoldTime._640ms), theta ?? 5.6889f);
             }
         }
 
@@ -95,14 +95,14 @@ namespace MbientLab.MetaWear.Impl {
                     base(dataTypeBase, bridge) {
             }
 
-            public override void ConfigureAny(int? count = null, float? threshold = null) {
+            public override Task ConfigureAny(int? count = null, float? threshold = null) {
                 byte[] config = InitialMotionConfig;
                 config[3] &= (~0x2) & 0xff;
 
-                ConfigureAnyInner(config, count, threshold);
+                return ConfigureAnyInner(config, count, threshold);
             }
 
-            public override void ConfigureNo(int? duration = null, float? threshold = null) {
+            public override Task ConfigureNo(int? duration = null, float? threshold = null) {
                 byte[] config = InitialMotionConfig;
                 config[3] |= 0x1;
 
@@ -123,10 +123,10 @@ namespace MbientLab.MetaWear.Impl {
                 }
 
                 mask = 0x38;
-                bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
             }
 
-            public void ConfigureSignificant(SkipTime? skip = null, ProofTime? proof = null) {
+            public Task ConfigureSignificant(SkipTime? skip = null, ProofTime? proof = null) {
                 byte[] config = InitialMotionConfig;
                 config[3] |= 0x2;
 
@@ -138,14 +138,14 @@ namespace MbientLab.MetaWear.Impl {
                 }
 
                 mask = 0x7;
-                bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
             }
 
-            public override void ConfigureSlow(byte? count = null, float? threshold = null) {
+            public override Task ConfigureSlow(byte? count = null, float? threshold = null) {
                 byte[] config = InitialMotionConfig;
                 config[3] &= (~0x1) & 0xff;
 
-                ConfigureSlowInner(config, count, threshold);
+                return ConfigureSlowInner(config, count, threshold);
             }
         }
 
@@ -253,16 +253,16 @@ namespace MbientLab.MetaWear.Impl {
                 response => readConfigTask.SetResult(response));
         }
 
-        public void Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, FilterMode filter = FilterMode.Normal) {
+        public Task Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, FilterMode filter = FilterMode.Normal) {
             accDataConfig[0] = (byte) (((int) odr + 1) | ((FREQUENCIES[(int)odr] < 12.5f) ? 0x80 : (int)filter << 4));
             accDataConfig[1] &= 0xf0;
             accDataConfig[1] |= RANGE_BIT_MASKS[(int) range];
 
-            bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, accDataConfig);
+            return bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, accDataConfig);
         }
 
-        public override void Configure(float odr = 100f, float range = 2f) {
-            Configure((OutputDataRate) Util.closestIndex(FREQUENCIES, odr), (DataRange) Util.closestIndex(RANGES, range));
+        public override Task Configure(float odr = 100f, float range = 2f) {
+            return Configure((OutputDataRate) Util.closestIndex(FREQUENCIES, odr), (DataRange) Util.closestIndex(RANGES, range));
         }
 
         public async override Task PullConfigAsync() {

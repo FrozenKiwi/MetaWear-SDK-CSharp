@@ -29,7 +29,7 @@ namespace MbientLab.MetaWear.Test {
 
             var iswitch = metawear.GetModule<ISwitch>();
             await iswitch.State.AddRouteAsync(source => source.Count().React(token => ibeacon.SetMajor(token)));
-            ibeacon.Enable();
+            await ibeacon.Enable();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

@@ -1,4 +1,6 @@
-﻿namespace MbientLab.MetaWear {
+﻿using System.Threading.Tasks;
+
+namespace MbientLab.MetaWear {
     /// <summary>
     /// A data producer that only emits data when a <see cref="Read"/> command is issued.
     /// <para>Read commands can be scheduled on the MetaWear using 
@@ -9,6 +11,6 @@
         /// <summary>
         /// Sends a read command to the producer
         /// </summary>
-        void Read();
+        Task Read();
     }
 }

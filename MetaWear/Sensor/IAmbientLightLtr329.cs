@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.AmbientLightLtr329;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace AmbientLightLtr329 {
@@ -76,6 +77,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="gain">Controls the range and resolution of illuminance values, defaults to 1x</param>
         /// <param name="time">Measurement time for each cycle, defaults to 100mx</param>
         /// <param name="rate">How frequently to update the illuminance data, defaults to 500ms</param>
-        void Configure(Gain gain = Gain._1x, IntegrationTime time = IntegrationTime._100ms, MeasurementRate rate = MeasurementRate._500ms);
+        Task Configure(Gain gain = Gain._1x, IntegrationTime time = IntegrationTime._100ms, MeasurementRate rate = MeasurementRate._500ms);
     }
 }

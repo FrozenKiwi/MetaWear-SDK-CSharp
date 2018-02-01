@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.BarometerBosch;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     /// <summary>
@@ -13,6 +14,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// Configure the snsor with settings specific to the BME280 humidity sensor
         /// </summary>
         /// <param name="os">Oversampling mode, defaults to standard</param>
-        void Configure(Oversampling os = Oversampling.Standard);
+        Task Configure(Oversampling os = Oversampling.Standard);
     }
 }

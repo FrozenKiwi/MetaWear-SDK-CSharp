@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Data;
 using MbientLab.MetaWear.Sensor.AccelerometerBosch;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace AccelerometerBosch {
@@ -35,7 +36,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// <param name="mode">New calculation mode</param>
             /// <param name="hysteresis">New hysteresis value for landscape/portrait detection.  
             /// This value is in g's and defaults to 0.0625g</param>
-            void Configure(OrientationMode? mode = null, float? hysteresis = null);
+            Task Configure(OrientationMode? mode = null, float? hysteresis = null);
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// <param name="hold">Delay for which the flat value must remain stable for an interrupt, in milliseconds.  
             /// The closest valid value will be chosen.</param>
             /// <param name="theta">Threshold angle defining a flat position, between [0, 44.8] degrees</param>
-            void Configure(ushort? hold = null, float? theta = null);
+            Task Configure(ushort? hold = null, float? theta = null);
         }
 
         /// <summary>
@@ -152,7 +153,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// <param name="highDuration">Minimum amount of time the acceleration sign does not change for an interrupt</param>
             /// <param name="highThreshold">Threshold for clearing high-g interrupt</param>
             /// <param name="highHysteresis">Hysteresis level for clearing the high-g interrupt</param>
-            void Configure(bool enableLowG = false, ushort? lowDuration = null, float? lowThreshold = null, float? lowHysteresis = null, LowGMode? mode = null,
+            Task Configure(bool enableLowG = false, ushort? lowDuration = null, float? lowThreshold = null, float? lowHysteresis = null, LowGMode? mode = null,
                 bool enableHighGx = false, bool enableHighGy = false, bool enableHighGz = false, ushort? highDuration = null, float? highThreshold = null, float? highHysteresis = null);
         }
 
@@ -218,19 +219,19 @@ namespace MbientLab.MetaWear.Sensor {
             /// </summary>
             /// <param name="duration">Time, in milliseconds, for which no slope data points exceed the threshold</param>
             /// <param name="threshold">Threshold, in g's, for which no slope data points must exceed</param>
-            void ConfigureNo(int? duration = null, float? threshold = null);
+            Task ConfigureNo(int? duration = null, float? threshold = null);
             /// <summary>
             /// Configure the accelerometer for any-motion detection
             /// </summary>
             /// <param name="count">Number of consecutive slope data points that must be above the threshold</param>
             /// <param name="threshold">Value that the slope data points must be above</param>
-            void ConfigureAny(int? count = null, float? threshold = null);
+            Task ConfigureAny(int? count = null, float? threshold = null);
             /// <summary>
             /// Configure the accelerometer for slow-motion detection
             /// </summary>
             /// <param name="count">Number of consecutive slope data points that must be above the threshold</param>
             /// <param name="threshold">Threshold, in g's, for which no slope data points must exceed</param>
-            void ConfigureSlow(byte? count = null, float? threshold = null);
+            Task ConfigureSlow(byte? count = null, float? threshold = null);
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// <param name="quiet">Time that must pass before a second tap can occur</param>
             /// <param name="shock">Time to lock the data in the status register</param>
             /// <param name="window">Length of time for a second shock to occur for a double tap</param>
-            void Configure(bool enableSingle = false, bool enableDouble = false, float? threshold = null, TapQuietTime? quiet = null, TapShockTime? shock = null, DoubleTapWindow? window = null);
+            Task Configure(bool enableSingle = false, bool enableDouble = false, float? threshold = null, TapQuietTime? quiet = null, TapShockTime? shock = null, DoubleTapWindow? window = null);
         }
     }
     /// <summary>

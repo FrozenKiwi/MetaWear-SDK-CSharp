@@ -26,7 +26,7 @@ namespace MbientLab.MetaWear.Test {
 
             var route = await switchModule.State.AddRouteAsync(source => source.Stream(null));
 
-            route.Remove();
+            await route.Remove();
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 

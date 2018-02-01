@@ -77,8 +77,8 @@ namespace MbientLab.MetaWear.Impl {
         public DataProcessor(IModuleBoardBridge bridge) : base(bridge) {
         }
 
-        public override void tearDown() {
-            bridge.sendCommand(new byte[] { (byte)DATA_PROCESSOR, REMOVE_ALL });
+        public override async Task tearDown() {
+            await bridge.sendCommand(new byte[] { (byte)DATA_PROCESSOR, REMOVE_ALL });
             foreach(var it in nameToId.Keys) {
                 bridge.removeProducerName(it);
             }
@@ -120,10 +120,10 @@ namespace MbientLab.MetaWear.Impl {
                 value.Item2 as T : null;
         }
 
-        internal void remove(byte id, bool sync) {
+        internal async Task remove(byte id, bool sync) {
             activeProcessors.Remove(id);
             if (sync) {
-                bridge.sendCommand(new byte[] { (byte)DATA_PROCESSOR, REMOVE, id });
+                await bridge.sendCommand(new byte[] { (byte)DATA_PROCESSOR, REMOVE, id });
             }
         }
 
@@ -153,16 +153,16 @@ namespace MbientLab.MetaWear.Impl {
                 }
             } catch (TimeoutException e) {
                 foreach (byte it in successfulProcessors) {
-                    removeProcessor(true, it);
+                    await removeProcessor(true, it);
                 }
                 throw e;
             }
             return successfulProcessors;
         }
 
-        void removeProcessor(bool sync, byte id) {
+        async Task removeProcessor(bool sync, byte id) {
             if (sync && activeProcessors.TryGetValue(id, out Tuple<DataTypeBase, EditorImplBase> value)) {
-                bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, REMOVE, value.Item2.source.eventConfig[2] });
+                await bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, REMOVE, value.Item2.source.eventConfig[2] });
             }
 
             activeProcessors.Remove(id);

@@ -31,13 +31,13 @@ namespace MbientLab.MetaWear.Test {
         }
 
         [Test]
-        public void ConfigureExtThermistor() {
+        public async Task ConfigureExtThermistor() {
             byte[][] expected = new byte[][] {
                 new byte[] { 0x04, 0x02, 0x02, 0x00, 0x01, 0x00 }
             };
 
             var sensor = temperature.FindSensors(SensorType.ExtThermistor)[0] as IExternalThermistor;
-            sensor.Configure(0, 1, false);
+            await sensor.Configure(0, 1, false);
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -55,7 +55,7 @@ namespace MbientLab.MetaWear.Test {
 
             var sensor = temperature.Sensors[channel];
             await sensor.AddRouteAsync(source => source.Stream());
-            temperature.Sensors[channel].Read();
+            await temperature.Sensors[channel].Read();
 
             platform.fileSuffix = "temperature";
             await metawear.SerializeAsync();

@@ -84,11 +84,11 @@ namespace MbientLab.MetaWear.Impl {
                 valid = true;
             }
 
-            public void Remove() {
-                Remove(true);
+            public Task Remove() {
+                return Remove(true);
             }
 
-            internal void Remove(bool sync) {
+            internal async Task Remove(bool sync) {
                 if (valid) {
                     valid = false;
 
@@ -97,7 +97,7 @@ namespace MbientLab.MetaWear.Impl {
 
                         Event eventModule = bridge.GetModule<Event>();
                         foreach (byte it in eventCmdIds) {
-                            eventModule.remove(it);
+                            await eventModule.remove(it);
                         }
                     }
                 }
@@ -134,11 +134,11 @@ namespace MbientLab.MetaWear.Impl {
                     this.eventCmdIds = eventCmdIds;
                 }
 
-                public void Remove() {
-                    Remove(true);
+                public Task Remove() {
+                    return Remove(true);
                 }
 
-                internal void Remove(bool sync) {
+                internal async Task Remove(bool sync) {
                     if (Valid) {
                         _Valid = false;
 
@@ -146,26 +146,28 @@ namespace MbientLab.MetaWear.Impl {
                             Timer timer = bridge.GetModule<Timer>();
                             timer.activeTasks[id] = null;
 
-                            bridge.sendCommand(new byte[] { (byte) TIMER, REMOVE, id });
+                            await bridge.sendCommand(new byte[] { (byte) TIMER, REMOVE, id });
 
                             Event eventModule = bridge.GetModule<Event>();
                             foreach(byte it in eventCmdIds) {
-                                eventModule.remove(it);
+                                await eventModule.remove(it);
                             }
                         }
                     }
                 }
 
-                public void Start() {
+                public Task Start() {
                     if (Valid) {
-                        bridge.sendCommand(new byte[] { (byte) TIMER, START, id });
+                        return bridge.sendCommand(new byte[] { (byte) TIMER, START, id });
                     }
+                    return Task.CompletedTask;
                 }
 
-                public void Stop() {
+                public Task Stop() {
                     if (Valid) {
-                        bridge.sendCommand(new byte[] { (byte)TIMER, STOP, id });
+                        return bridge.sendCommand(new byte[] { (byte)TIMER, STOP, id });
                     }
+                    return Task.CompletedTask;
                 }
             }
 
@@ -192,13 +194,13 @@ namespace MbientLab.MetaWear.Impl {
                 bridge.addRegisterResponseHandler(Tuple.Create((byte)TIMER, TIMER_ENTRY), response => createTimerTask.SetResult(response[2]));
             }
 
-            public override void tearDown() {
+            public override async Task tearDown() {
                 byte i = 0;
                 foreach(var e in activeTasks) {
                     if (e != null) {
-                        e.Remove(false);
+                        await e.Remove(false);
                     }
-                    bridge.sendCommand(new byte[] { (byte)TIMER, REMOVE, i });
+                    await bridge.sendCommand(new byte[] { (byte)TIMER, REMOVE, i });
                     i++;
                 };
             }
@@ -258,17 +260,17 @@ namespace MbientLab.MetaWear.Impl {
                 }
             }
 
-            public async Task sendCommand(Module module, byte register, byte[] bytes) {
+            public Task sendCommand(Module module, byte register, byte[] bytes) {
                 byte[] command = new byte[bytes.Length + 2];
 
                 command[0] = (byte) module;
                 command[1] = register;
                 Array.Copy(bytes, 0, command, 2, bytes.Length);
 
-                await sendCommand(command);
+                return sendCommand(command);
             }
 
-            public async Task sendCommand(Module module, byte register, byte id, byte[] bytes) {
+            public Task sendCommand(Module module, byte register, byte id, byte[] bytes) {
                 byte[] command = new byte[bytes.Length + 3];
 
                 command[0] = (byte)module;
@@ -276,7 +278,7 @@ namespace MbientLab.MetaWear.Impl {
                 command[2] = id;
                 Array.Copy(bytes, 0, command, 3, bytes.Length);
 
-                await sendCommand(command);
+                return sendCommand(command);
             }
             public async Task sendCommand(byte[] command, byte dest, IDataToken input) {
                 metawear.persistent.modules.TryGetValue(typeof(Event).FullName, out var module);
@@ -287,14 +289,14 @@ namespace MbientLab.MetaWear.Impl {
                 await sendCommand(command);
                 eventModule.feedbackParams= null;
             }
-            public async Task sendCommand(byte dest, IDataToken input, Module module, byte register, byte id, params byte[] parameters) {
+            public Task sendCommand(byte dest, IDataToken input, Module module, byte register, byte id, params byte[] parameters) {
                 byte[] command = new byte[parameters.Length + 3];
                 Array.Copy(parameters, 0, command, 3, parameters.Length);
                 command[0] = (byte) module;
                 command[1] = register;
                 command[2] = id;
 
-                await sendCommand(command, dest, input);
+                return sendCommand(command, dest, input);
             }
 
             public Task<IRoute> queueRouteBuilder(Action<IRouteComponent> builder, DataTypeBase source) {
@@ -553,10 +555,10 @@ namespace MbientLab.MetaWear.Impl {
             return output;
         }
 
-        public async Task SerializeAsync() {
+        public Task SerializeAsync() {
             using (MemoryStream outs = new MemoryStream()) {
                 new DataContractSerializer(typeof(Persistent), SERIALIZE_SETTINGS).WriteObject(outs, persistent);
-                await io.LocalSaveAsync(BOARD_STATE, outs.ToArray());
+                return io.LocalSaveAsync(BOARD_STATE, outs.ToArray());
             }
         }
 
@@ -652,17 +654,17 @@ namespace MbientLab.MetaWear.Impl {
             return persistent.activeRoutes.TryGetValue(id, out var route) ? route : null;
         }
 
-        public void TearDown() {
+        public async Task TearDown() {
             foreach (var it in persistent.activeRoutes.Values) {
-                it.Remove(false);
+                await it.Remove(false);
             }
 
             foreach (var it in persistent.activeObservers.Values) {
-                it.Remove(false);
+                await it.Remove(false);
             }
 
             foreach (var it in persistent.modules.Values) {
-                (it as ModuleImplBase).tearDown();
+                await (it as ModuleImplBase).tearDown();
             }
 
             persistent.id = 0;
@@ -671,8 +673,8 @@ namespace MbientLab.MetaWear.Impl {
         }
 
 #if NETSTANDARD2_0
-        public async Task DisconnectAsync() {
-            await gatt.DisconnectAsync();
+        public Task DisconnectAsync() {
+            return gatt.DisconnectAsync();
         }
 #endif
 
@@ -970,11 +972,11 @@ namespace MbientLab.MetaWear.Impl {
                 }
             }
 
-            public void Remove() {
-                Remove(true);
+            public Task Remove() {
+                return Remove(true);
             }
 
-            internal void Remove(bool sync) {
+            internal async Task Remove(bool sync) {
                 if (valid) {
                     valid = true;
 
@@ -983,17 +985,17 @@ namespace MbientLab.MetaWear.Impl {
                     }
 
                     foreach (var it in consumers) {
-                        it.disableStream(bridge);
+                        await it.disableStream(bridge);
 
                         if (it is LoggedDataConsumer) {
-                            (it as LoggedDataConsumer).remove(bridge, sync);
+                            await (it as LoggedDataConsumer).remove(bridge, sync);
                         }
                     }
 
                     DataProcessor dataProc = bridge.GetModule<IDataProcessor>() as DataProcessor;
                     if (dataProcIds != null) {
                         foreach (var it in dataProcIds) {
-                            dataProc.remove(it, sync);
+                            await dataProc.remove(it, sync);
                         }
                     }
 
@@ -1008,7 +1010,7 @@ namespace MbientLab.MetaWear.Impl {
                         if (eventIds != null) {
                             Event eventModule = bridge.GetModule<Event>() as Event;
                             foreach (var it in eventIds) {
-                                eventModule.remove(it);
+                                await eventModule.remove(it);
                             }
                         }
                     }

@@ -1,4 +1,6 @@
-﻿namespace MbientLab.MetaWear {
+﻿using System.Threading.Tasks;
+
+namespace MbientLab.MetaWear {
     /// <summary>
     /// Monitors an on-board event and executes the corresponding MetaWear commands when its event is fired
     /// </summary>
@@ -16,6 +18,6 @@
         /// <summary>
         /// Removes the observer from the board marks the object as invalid
         /// </summary>
-        void Remove();
+        Task Remove();
     }
 }

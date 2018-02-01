@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Sensor.ColorTcs34725;
 using System;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace ColorTcs34725 {
@@ -66,6 +67,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="gain">Analog gain, defaults to 1x</param>
         /// <param name="integationTime">Integration time, impacts resolution and sensitivity, defaults to 2.4ms</param>
         /// <param name="illuminate">True if illuminator led should be flashed before measuring the data, defaults to false</param>
-        void Configure(Gain gain = Gain._1x, float integationTime = 2.4f, bool illuminate = false);
+        Task Configure(Gain gain = Gain._1x, float integationTime = 2.4f, bool illuminate = false);
     }
 }

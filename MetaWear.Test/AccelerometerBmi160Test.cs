@@ -42,7 +42,7 @@ namespace MbientLab.MetaWear.Test {
                 await accelerometer.StepCounter.AddRouteAsync(
                     source => source.Stream()
                 );
-                accelerometer.StepCounter.Read();
+                await accelerometer.StepCounter.Read();
 
                 Assert.That(platform.GetCommands(), Is.EqualTo(expected));
             }
@@ -72,10 +72,10 @@ namespace MbientLab.MetaWear.Test {
                 var detector = accelerometer.StepDetector;
 
                 var route = await detector.AddRouteAsync(source => source.Stream());
-                detector.Start();
+                await detector.Start();
 
-                detector.Stop();
-                route.Remove();
+                await detector.Stop();
+                await route.Remove();
 
                 Assert.That(platform.GetCommands(), Is.EqualTo(expected));
             }
@@ -114,12 +114,12 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void Configure() {
+            public async Task Configure() {
                 byte[][] expected = {
                     new byte[] {0x03, 0x0a, 0x00, 0x14, 0x14, 0x36}
                 };
 
-                accelerometer.Motion.ConfigureSignificant(proof: ProofTime._1s, skip: SkipTime._1_5s);
+                await accelerometer.Motion.ConfigureSignificant(proof: ProofTime._1s, skip: SkipTime._1_5s);
 
                 Assert.That(platform.GetCommands(), Is.EqualTo(expected));
             }

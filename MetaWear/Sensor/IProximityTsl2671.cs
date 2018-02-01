@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.ProximityTsl2671;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace ProximityTsl2671 {
@@ -46,7 +47,7 @@ namespace MbientLab.MetaWear.Sensor {
         /// For boards powered by the CR2032 battery, it is recommended to use 25mA or less</param>
         /// <param name="integrationTime">Period of time the internal ADC converts the analog signal into digital counts, defaults to 2.72ms</param>
         /// <param name="nPulses">Number of pulses, defaults to 1.  Sensitivity grows by the square root of the number of pulses</param>
-        void Configure(ReceiverDiode diode = ReceiverDiode.Channel1, TransmitterDriveCurrent current = TransmitterDriveCurrent._25mA, 
+        Task Configure(ReceiverDiode diode = ReceiverDiode.Channel1, TransmitterDriveCurrent current = TransmitterDriveCurrent._25mA, 
             float integrationTime = 2.72f, byte nPulses = 1);
     }
 }

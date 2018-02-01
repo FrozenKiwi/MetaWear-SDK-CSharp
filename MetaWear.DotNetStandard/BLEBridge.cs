@@ -19,7 +19,6 @@ namespace MetaWear.NetStandard
         private IDevice device;
         private object connection;
         IDisposable _notification;
-        private ConcurrentDictionary<CharIdent, IGattCharacteristic> characteristics;
 
 
         public static Action<string /*category*/, string /*message*/, int /*severity*/> BleLogging;
@@ -44,16 +43,20 @@ namespace MetaWear.NetStandard
 
         public async Task DiscoverServicesAsync()
         {
-            await connectToDevice();
-            // We cannot await the below function, as it does not complete
-            //device.WhenAnyCharacteristicDiscovered().Subscribe((ch) =>
-            //{
-            //    characteristics.TryAdd(new CharIdent(ch.Service.Uuid, ch.Uuid), ch);
-            //});
+            bool isConnected = await connectToDevice();
+
+            if (isConnected)
+            {
+                // To discover services, we take the first one.
+                // The BLE library in the background will perform
+                // full service discovery.
+                var anyService = await device.WhenServiceDiscovered().Take(1);
+            }
         }
 
-        internal async Task connectToDevice()
+        internal async Task<bool> connectToDevice()
         {
+            bool isConnected = false;
             device.WhenStatusChanged().Subscribe(status =>
             {
                 switch (status)
@@ -64,20 +67,25 @@ namespace MetaWear.NetStandard
                         connection = null;
                         OnDisconnect?.Invoke();
                         break;
+                    case ConnectionStatus.Connected:
+                        isConnected = true;
+                        break;
                 };
             });
+
 
 
             using (var cancelSrc = new CancellationTokenSource())
             {
                 //using (this.Dialogs.Loading("Connecting", cancelSrc.Cancel, "Cancel"))
                 {
-                    connection = await this.device.Connect();
+                    connection = await device.Connect();
                 }
             }
 
             // Cache all characteristics?
-            characteristics = new ConcurrentDictionary<CharIdent, IGattCharacteristic>();
+            //characteristics = new ConcurrentDictionary<CharIdent, IGattCharacteristic>();
+            return isConnected;
         }
 
         public ulong BluetoothAddress => 0; // TODO

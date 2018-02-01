@@ -55,15 +55,15 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="odr">Output data rate</param>
         /// <param name="range">Data range</param>
         /// <param name="filter">Accelerometer digital filter mode</param>
-        void Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._125dps, FilterMode filter = FilterMode.Normal);
+        Task Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._125dps, FilterMode filter = FilterMode.Normal);
         /// <summary>
         /// Switch the gyro into active mode
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Switch the gyro into standby mode
         /// </summary>
-        void Stop();
+        Task Stop();
 
         /// <summary>
         /// Pulls the current gyro output data rate and data range from the sensor

@@ -9,6 +9,11 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <Import Project="..\MetaWear\MetaWear.projitems" Label="Shared" />
 
   <Import Project="..\MetaWear.Impl\MetaWear.Impl.projitems" Label="Shared" />
@@ -16,8 +21,12 @@
   <Import Project="..\MetaWear.Platform\MetaWear.Platform.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Plugin.BluetoothLE" Version="5.3.1" />
     <PackageReference Include="ReactiveUI" Version="8.0.0-alpha0117" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\bluetoothle\Plugin.BluetoothLE.Abstractions\Plugin.BluetoothLE.Abstractions.csproj" />
+    <ProjectReference Include="..\..\bluetoothle\Plugin.BluetoothLE\Plugin.BluetoothLE.csproj" />
   </ItemGroup>
 
 </Project>

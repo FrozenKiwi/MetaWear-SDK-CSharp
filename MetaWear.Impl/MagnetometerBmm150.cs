@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Serialization;
 using MbientLab.MetaWear.Sensor.MagnetometerBmm150;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [KnownType(typeof(Bmm150CartesianFloatData))]
@@ -81,43 +82,41 @@ namespace MbientLab.MetaWear.Impl {
             collection.Add(packedBFieldDataType);
         }
 
-        public void Configure(ushort xyReps = 9, ushort zReps = 15, OutputDataRate odr = OutputDataRate._10Hz) {
+        public async Task Configure(ushort xyReps = 9, ushort zReps = 15, OutputDataRate odr = OutputDataRate._10Hz) {
             if (bridge.lookupModuleInfo(MAGNETOMETER).revision >= SUSPEND_REVISION) {
-                Stop();
+                await Stop();
             }
-            bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, DATA_REPETITIONS, (byte)((xyReps - 1) / 2), (byte)(zReps - 1) });
-            bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, DATA_RATE, (byte)odr });
+            await bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, DATA_REPETITIONS, (byte)((xyReps - 1) / 2), (byte)(zReps - 1) });
+            await bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, DATA_RATE, (byte)odr });
         }
 
-        public void Configure(Preset preset) {
+        public Task Configure(Preset preset) {
             switch (preset) {
                 case Preset.LowPower:
-                    Configure(3, 3);
-                    break;
+                    return Configure(3, 3);
                 case Preset.Regular:
-                    Configure();
-                    break;
+                    return Configure();
                 case Preset.EnhancedRegular:
-                    Configure(15, 27);
-                    break;
+                    return Configure(15, 27);
                 case Preset.HighAccuracy:
-                    Configure(47, 83, OutputDataRate._20Hz);
-                    break;
+                    return Configure(47, 83, OutputDataRate._20Hz);
             }
+            return Task.CompletedTask;
         }
 
-        public void Start() {
-            bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, POWER_MODE, 1 });
+        public Task Start() {
+            return bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, POWER_MODE, 1 });
         }
 
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, POWER_MODE, 0 });
+        public Task Stop() {
+            return bridge.sendCommand(new byte[] { (byte) MAGNETOMETER, POWER_MODE, 0 });
         }
 
-        public void Suspend() {
+        public Task Suspend() {
             if (bridge.lookupModuleInfo(MAGNETOMETER).revision >= SUSPEND_REVISION) {
-                bridge.sendCommand(new byte[] { (byte)MAGNETOMETER, POWER_MODE, 2 });
+                return bridge.sendCommand(new byte[] { (byte)MAGNETOMETER, POWER_MODE, 2 });
             }
+            return Task.CompletedTask;
         }
     }
 }

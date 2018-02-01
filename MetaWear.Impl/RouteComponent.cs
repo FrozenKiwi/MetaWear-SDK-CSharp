@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MbientLab.MetaWear.Core.DataProcessor;
 using static MbientLab.MetaWear.Impl.DataProcessorConfig.MathConfig;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     enum BranchType {
@@ -184,13 +185,13 @@ namespace MbientLab.MetaWear.Impl {
         internal class AverageEditorInner : EditorImplBase, IHighPassEditor, ILowPassEditor {
             internal AverageEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
             
-            public void Modify(byte samples) {
+            public Task Modify(byte samples) {
                 config[2] = samples;
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
 
-            public void Reset() {
-                bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2] });
+            public Task Reset() {
+                return bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2] });
             }
         }
 
@@ -226,19 +227,19 @@ namespace MbientLab.MetaWear.Impl {
         internal class CounterEditorInner : EditorImplBase, ICounterEditor {
             internal CounterEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Reset() {
-                bridge.sendCommand(new byte[] {(byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2],
+            public Task Reset() {
+                return bridge.sendCommand(new byte[] {(byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2],
                         0x00, 0x00, 0x00, 0x00});
             }
 
-            public void Set(uint value) {
+            public Task Set(uint value) {
                 byte[] command = new byte[7];
                 command[0] = (byte)DATA_PROCESSOR;
                 command[1] = DataProcessor.STATE;
                 command[2] = source.eventConfig[2];
                 Array.Copy(Util.uintToBytesLe(value), 0, command, 3, 4);
 
-                bridge.sendCommand(command);
+                return bridge.sendCommand(command);
             }
         }
 
@@ -246,19 +247,19 @@ namespace MbientLab.MetaWear.Impl {
         internal class AccumulatorEditorInner : EditorImplBase, IAccumulatorEditor {
             internal AccumulatorEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Reset() {
-                bridge.sendCommand(new byte[] {(byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2],
+            public Task Reset() {
+                return bridge.sendCommand(new byte[] {(byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2],
                         0x00, 0x00, 0x00, 0x00});
             }
 
-            public void Set(float value) {
+            public Task Set(float value) {
                 byte[] command = new byte[7];
                 command[0] = (byte)DATA_PROCESSOR;
                 command[1] = DataProcessor.STATE;
                 command[2] = source.eventConfig[2];
                 Array.Copy(Util.intToBytesLe((int)(source.scale(bridge) * value)), 0, command, 3, 4);
 
-                bridge.sendCommand(command);
+                return bridge.sendCommand(command);
             }
         }
 
@@ -310,14 +311,14 @@ namespace MbientLab.MetaWear.Impl {
                 base(config, source, bridge) {
             }
 
-            public void Modify(Comparison op, params float[] references) {
+            public Task Modify(Comparison op, params float[] references) {
                 byte[] newConfig = new byte[6];
                 newConfig[0] = (byte)op;
                 newConfig[1] = 0;
                 Array.Copy(Util.intToBytesLe((int)(references[0] * source.scale(bridge))), 0, newConfig, 2, 4);
                 
                 Array.Copy(newConfig, 0, config, 2, newConfig.Length);
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
         [DataContract]
@@ -365,7 +366,7 @@ namespace MbientLab.MetaWear.Impl {
 
             internal MultiValueComparatorEditor(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Modify(Comparison op, params float[] references) {
+            public Task Modify(Comparison op, params float[] references) {
                 byte[] newRef = fillReferences(source.scale(bridge), source, references);
 
                 byte[] newConfig = new byte[2 + references.Length * source.attributes.length()];
@@ -375,7 +376,7 @@ namespace MbientLab.MetaWear.Impl {
                 Array.Copy(newRef, 0, newConfig, 2, newRef.Length);
                 config = newConfig;
 
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
         public IRouteComponent Filter(Comparison op, params float[] references) {
@@ -489,7 +490,7 @@ namespace MbientLab.MetaWear.Impl {
         internal class MapEditorInner : EditorImplBase, IMapEditor {
             internal MapEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void ModifyRhs(float rhs) {
+            public Task ModifyRhs(float rhs) {
                 float scaledRhs;
 
                 switch ((Operation) (config[2] - 1)) {
@@ -509,8 +510,8 @@ namespace MbientLab.MetaWear.Impl {
 
                 byte[] newRhs = Util.intToBytesLe((int)scaledRhs);
                 Array.Copy(newRhs, 0, config, 3, newRhs.Length);
-                
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
         private RouteComponent applyMath(Operation op, float rhs) {
@@ -568,15 +569,15 @@ namespace MbientLab.MetaWear.Impl {
         internal class PassthroughEditorInner : EditorImplBase, IPassthroughEditor {
             internal PassthroughEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge)  : base(config, source, bridge) { }
 
-            public void Set(ushort value) {
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2], Util.ushortToBytesLe(value));
+            public Task Set(ushort value) {
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2], Util.ushortToBytesLe(value));
             }
 
-            public void Modify(Passthrough type, ushort value) {
+            public Task Modify(Passthrough type, ushort value) {
                 Array.Copy(Util.ushortToBytesLe(value), 0, config, 2, 2);
                 config[1] = (byte) (((int) type) & 0x7);
 
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
 
@@ -612,12 +613,12 @@ namespace MbientLab.MetaWear.Impl {
         internal class PulseEditorInner : EditorImplBase, IPulseEditor {
             internal PulseEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Modify(float threshold, ushort samples) {
+            public Task Modify(float threshold, ushort samples) {
                 byte[] newConfig = new byte[6];
                 Array.Copy(Util.intToBytesLe((int) (threshold * source.scale(bridge))), newConfig, 4);
                 Array.Copy(Util.ushortToBytesLe(samples), 0, newConfig, 4, 2);
 
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, newConfig);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, newConfig);
             }
         }
         public IRouteComponent Find(Pulse pulse, float threshold, ushort samples) {
@@ -643,12 +644,12 @@ namespace MbientLab.MetaWear.Impl {
         internal class ThresholdEditorInner : EditorImplBase, IThresholdEditor {
             internal ThresholdEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Modify(float threshold, float hysteresis) {
+            public Task Modify(float threshold, float hysteresis) {
                 byte[] newConfig = new byte[6];
                 Array.Copy(Util.intToBytesLe((int) (source.scale(bridge) * threshold)), newConfig, 4);
                 Array.Copy(Util.shortToBytesLe((short)(source.scale(bridge) * hysteresis)), 4, newConfig, 0, 2);
 
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, newConfig);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, newConfig);
             }
         }
         public IRouteComponent Find(Threshold threshold, float boundary) {
@@ -678,10 +679,10 @@ namespace MbientLab.MetaWear.Impl {
         internal class DifferentialEditorInner : EditorImplBase, IDifferentialEditor {
             internal DifferentialEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Modify(float distance) {
+            public Task Modify(float distance) {
                 Array.Copy(Util.intToBytesLe((int) (distance * source.scale(bridge))), 0, config, 2, 4);
 
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
         public IRouteComponent Find(Differential differential, float distance) {
@@ -707,10 +708,10 @@ namespace MbientLab.MetaWear.Impl {
         internal class TimeEditorInner : EditorImplBase, ITimeEditor {
             internal TimeEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Modify(uint period) {
+            public Task Modify(uint period) {
                 Array.Copy(Util.uintToBytesLe(period), 0, config, 2, 4);
-                
-                bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
+
+                return bridge.sendCommand(DATA_PROCESSOR, DataProcessor.PARAMETER, source.eventConfig[2], config);
             }
         }
         public IRouteComponent Limit(uint period) {
@@ -733,8 +734,8 @@ namespace MbientLab.MetaWear.Impl {
         internal class PackerEditorInner : EditorImplBase, IPackerEditor {
             internal PackerEditorInner(byte[] config, DataTypeBase source, IModuleBoardBridge bridge) : base(config, source, bridge) { }
 
-            public void Clear() {
-                bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2] });
+            public Task Clear() {
+                return bridge.sendCommand(new byte[] { (byte) DATA_PROCESSOR, DataProcessor.STATE, source.eventConfig[2] });
             }
         }
         public IRouteComponent Pack(byte count) {

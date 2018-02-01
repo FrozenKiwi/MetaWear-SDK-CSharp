@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.MagnetometerBmm150;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace MagnetometerBmm150 {
@@ -58,25 +59,25 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="xyReps">Number of repetitions on the XY axis, between [1, 511], defauts to 9 reps</param>
         /// <param name="zReps">Number of repetitions on the Z axis, between [1, 256], defaut to 15 reps</param>
         /// <param name="odr">Output data rate, defaults to 10Hz</param>
-        void Configure(ushort xyReps = 9, ushort zReps = 15, OutputDataRate odr = OutputDataRate._10Hz);
+        Task Configure(ushort xyReps = 9, ushort zReps = 15, OutputDataRate odr = OutputDataRate._10Hz);
         /// <summary>
         /// Apply a preset configuration
         /// </summary>
         /// <param name="preset">Preset configuration to use</param>
-        void Configure(Preset preset);
+        Task Configure(Preset preset);
 
         /// <summary>
         /// Switch the magnetometer into normal mode
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Switch the magnetometer into sleep mode
         /// </summary>
-        void Stop();
+        Task Stop();
         /// <summary>
         /// Switch the magnetometer into suspend mode.  When placed in suspend mode, sensor settings are reset 
         /// and will need to be reconfigured.
         /// </summary>
-        void Suspend();
+        Task Suspend();
     }
 }

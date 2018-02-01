@@ -126,7 +126,7 @@ namespace MbientLab.MetaWear.Impl {
             internal OrientationDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(ORIENT_INTERRUPT_ENABLE, 0x1, dataTypeBase, bridge) {
             }
 
-            public void Configure(OrientationMode? mode = null, float? hysteresis = null) {
+            public Task Configure(OrientationMode? mode = null, float? hysteresis = null) {
                 byte[] config = new byte[] { 0x18, 0x48 };
 
                 if (hysteresis.HasValue) {
@@ -136,7 +136,7 @@ namespace MbientLab.MetaWear.Impl {
                 config[0] &= 0xfc;
                 config[0] |= (byte)(mode ?? OrientationMode.SYMMETRICAL);
 
-                bridge.sendCommand(ACCELEROMETER, ORIENT_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, ORIENT_CONFIG, config);
             }
         }
 
@@ -180,15 +180,15 @@ namespace MbientLab.MetaWear.Impl {
             internal BoschFlatDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(FLAT_INTERRUPT_ENABLE, 0x1, dataTypeBase, bridge) {
             }
 
-            public abstract void Configure(ushort? hold = null, float? theta = null);
+            public abstract Task Configure(ushort? hold = null, float? theta = null);
 
-            internal void Write(byte hold, float theta) {
+            internal Task Write(byte hold, float theta) {
                 byte[] flatConfig = new byte[] { 0x08, 0x11 };
 
                 flatConfig[0] |= (byte)((int)(theta / THETA_STEP) & 0x3f);
                 flatConfig[1] |= (byte)(hold << 4);
 
-                bridge.sendCommand(ACCELEROMETER, FLAT_CONFIG, flatConfig);
+                return bridge.sendCommand(ACCELEROMETER, FLAT_CONFIG, flatConfig);
             }
         }
 
@@ -237,7 +237,7 @@ namespace MbientLab.MetaWear.Impl {
             internal BoschTapDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(TAP_INTERRUPT_ENABLE, 0x0, dataTypeBase, bridge) {
             }
 
-            public void Configure(bool enableSingle = false, bool enableDouble = false, float? threshold = null, 
+            public Task Configure(bool enableSingle = false, bool enableDouble = false, float? threshold = null, 
                     TapQuietTime? quiet = null, TapShockTime? shock = null, DoubleTapWindow? window = null) {
                 byte[] tapConfig = new byte[] { 0x04, 0x0a };
 
@@ -266,12 +266,12 @@ namespace MbientLab.MetaWear.Impl {
                     mask |= 0x1;
                 }
 
-                bridge.sendCommand(ACCELEROMETER, TAP_CONFIG, tapConfig);
+                return bridge.sendCommand(ACCELEROMETER, TAP_CONFIG, tapConfig);
             }
 
-            public override void Stop() {
+            public override Task Stop() {
                 mask = 0x3;
-                base.Stop();
+                return base.Stop();
             }
         }
 
@@ -328,7 +328,7 @@ namespace MbientLab.MetaWear.Impl {
                     base(LOW_HIGH_G_INTERRUPT_ENABLE, 0x0, dataTypeBase, bridge) {
             }
 
-            public void Configure(bool enableLowG = false, ushort? lowDuration = null, float? lowThreshold = null, float? lowHysteresis = null, LowGMode? mode = null, 
+            public Task Configure(bool enableLowG = false, ushort? lowDuration = null, float? lowThreshold = null, float? lowHysteresis = null, LowGMode? mode = null, 
                     bool enableHighGx = false, bool enableHighGy = false, bool enableHighGz = false, ushort? highDuration = null, float? highThreshold = null, float? highHysteresis = null) {
                 var accelerometer = bridge.GetModule<IAccelerometerBosch>() as AccelerometerBosch;
                 byte[] config = accelerometer.InitialLowHighGConfig;
@@ -371,12 +371,12 @@ namespace MbientLab.MetaWear.Impl {
                     config[4] = (byte)(highThreshold / BOSCH_HIGH_THRESHOLD_STEPS[accelerometer.DataScaleIndex]);
                 }
 
-                bridge.sendCommand(ACCELEROMETER, LOW_HIGH_G_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, LOW_HIGH_G_CONFIG, config);
             }
 
-            public override void Stop() {
+            public override Task Stop() {
                 mask = 0xf;
-                base.Stop();
+                return base.Stop();
             }
         }
 
@@ -434,8 +434,8 @@ namespace MbientLab.MetaWear.Impl {
                 accelerometer = bridge.GetModule<IAccelerometerBosch>() as AccelerometerBosch;
             }
 
-            public abstract void ConfigureAny(int? count = null, float? threshold = null);
-            protected void ConfigureAnyInner(byte[] config, int? count = null, float? threshold = null) {
+            public abstract Task ConfigureAny(int? count = null, float? threshold = null);
+            protected Task ConfigureAnyInner(byte[] config, int? count = null, float? threshold = null) {
                 if (count.HasValue) {
                     config[0] &= 0xfc;
                     config[0] |= (byte)(count - 1);
@@ -446,14 +446,14 @@ namespace MbientLab.MetaWear.Impl {
                 }
 
                 mask = 0x7;
-                bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
             }
 
 
-            public abstract void ConfigureNo(int? duration = null, float? threshold = null);
+            public abstract Task ConfigureNo(int? duration = null, float? threshold = null);
 
-            public abstract void ConfigureSlow(byte? count = null, float? threshold = null);
-            protected void ConfigureSlowInner(byte[] config, byte? count = null, float? threshold = null) {
+            public abstract Task ConfigureSlow(byte? count = null, float? threshold = null);
+            protected Task ConfigureSlowInner(byte[] config, byte? count = null, float? threshold = null) {
                 if (count.HasValue) {
                     config[0] &= 0x3;
                     config[0] |= (byte)((count - 1) << 2);
@@ -463,7 +463,7 @@ namespace MbientLab.MetaWear.Impl {
                 }
 
                 mask = 0x38;
-                bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
+                return bridge.sendCommand(ACCELEROMETER, MOTION_CONFIG, config);
             }
         }
 
@@ -554,14 +554,14 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public abstract void Configure(float odr = 100, float range = 2f);
+        public abstract Task Configure(float odr = 100, float range = 2f);
 
-        public void Start() {
-            bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, POWER_MODE, 0x1 });
+        public Task Start() {
+            return bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, POWER_MODE, 0x1 });
         }
 
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, POWER_MODE, 0x0 });
+        public Task Stop() {
+            return bridge.sendCommand(new byte[] { (byte)ACCELEROMETER, POWER_MODE, 0x0 });
         }
 
         internal override void aggregateDataType(ICollection<DataTypeBase> collection) {

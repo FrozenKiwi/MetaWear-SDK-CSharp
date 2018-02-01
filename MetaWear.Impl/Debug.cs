@@ -22,15 +22,15 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        private Task SetupDisconnect(byte[] cmd) {
+        private async Task<bool> SetupDisconnect(byte[] cmd) {
             dcTaskSource = new TaskCompletionSource<bool>();
 
-            bridge.sendCommand(cmd).GetAwaiter().GetResult();
+            await bridge.sendCommand(cmd);
             if (bridge.GetModule<Event>()?.ActiveDataType != null) {
                 dcTaskSource.SetCanceled();
             }
 
-            return dcTaskSource.Task;
+            return await dcTaskSource.Task;
         }
 
         public Task DisconnectAsync() {
@@ -41,8 +41,8 @@ namespace MbientLab.MetaWear.Impl {
             return SetupDisconnect(new byte[] { (byte)DEBUG, 0x2 });
         }
 
-        public void ResetAfterGc() {
-            bridge.sendCommand(new byte[] { (byte) DEBUG, 0x5 });
+        public Task ResetAfterGc() {
+            return bridge.sendCommand(new byte[] { (byte) DEBUG, 0x5 });
         }
 
         public Task ResetAsync() {

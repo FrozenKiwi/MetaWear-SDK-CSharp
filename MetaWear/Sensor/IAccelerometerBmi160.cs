@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Sensor.AccelerometerBmi160;
 using MbientLab.MetaWear.Sensor.AccelerometerBosch;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace AccelerometerBmi160 {
@@ -55,11 +56,11 @@ namespace MbientLab.MetaWear.Sensor {
             /// Configure the step counter algorithm.  Must be called to have the step algorithm function as a counter.
             /// </summary>
             /// <param name="mode">Sensitivity mode, defaults to <see cref="StepDetectorMode.Normal"/></param>
-            void Configure(StepDetectorMode mode = StepDetectorMode.Normal);
+            Task Configure(StepDetectorMode mode = StepDetectorMode.Normal);
             /// <summary>
             /// Resets the internal step counter
             /// </summary>
-            void Reset();
+            Task Reset();
         }
         /// <summary>
         /// Interrupt driven step detection where each detected step triggers a data interrupt, cannot be used in 
@@ -70,7 +71,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// Configure the step counter algorithm.  Must be called to have the step algorithm function as a detector.
             /// </summary>
             /// <param name="mode">Sensitivity mode, defaults to <see cref="StepDetectorMode.Normal"/></param>
-            void Configure(StepDetectorMode mode = StepDetectorMode.Normal);
+            Task Configure(StepDetectorMode mode = StepDetectorMode.Normal);
         }
 
         /// <summary>
@@ -92,7 +93,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// </summary>
             /// <param name="hold">Delay for which the flat value must remain stable for an interrupt</param>
             /// <param name="theta">Threshold angle defining a flat position, between [0, 44.8] degrees</param>
-            void Configure(FlatHoldTime? hold = null, float? theta = null);
+            Task Configure(FlatHoldTime? hold = null, float? theta = null);
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// </summary>
             /// <param name="skip">Number of seconds to sleep after movement is detected</param>
             /// <param name="proof">Number of seconds that movement must still be detected after the skip time passed</param>
-            void ConfigureSignificant(SkipTime? skip = null, ProofTime? proof = null);
+            Task ConfigureSignificant(SkipTime? skip = null, ProofTime? proof = null);
         }
     }
     /// <summary>
@@ -162,6 +163,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="odr">Output data rate, defaults to 100Hz</param>
         /// <param name="range">Data range, defaults to +/-2g</param>
         /// <param name="filter">Accelerometer digital filter mode, defaults to <see cref="FilterMode.Normal"/></param>
-        void Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, FilterMode filter = FilterMode.Normal);
+        Task Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, FilterMode filter = FilterMode.Normal);
     }
 }

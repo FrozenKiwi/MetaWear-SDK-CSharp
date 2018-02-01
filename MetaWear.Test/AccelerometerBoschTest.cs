@@ -45,13 +45,13 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void ConfigureLow() {
+            public async Task ConfigureLow() {
                 byte[] expected = accelerometer is IAccelerometerBmi160 ?
                     new byte[] { 0x03, 0x07, 0x07, 0x40, 0x85, 0x0b, 0xc0 } :
                     new byte[] { 0x03, 0x07, 0x09, 0x40, 0x85, 0x0f, 0xc0 };
 
-                accelerometer.Configure(range: 16f);
-                accelerometer.LowAndHighG.Configure(enableLowG: true, lowThreshold: 0.5f, lowDuration: 20, mode: LowGMode.Sum);
+                await accelerometer.Configure(range: 16f);
+                await accelerometer.LowAndHighG.Configure(enableLowG: true, lowThreshold: 0.5f, lowDuration: 20, mode: LowGMode.Sum);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
@@ -78,13 +78,13 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void ConfigureHigh() {
+            public async Task ConfigureHigh() {
                 byte[] expected = accelerometer is IAccelerometerBmi160 ?
                     new byte[] { 0x03, 0x07, 0x07, 0x30, 0x81, 0x05, 0x20 } :
                     new byte[] { 0x03, 0x07, 0x09, 0x30, 0x81, 0x06, 0x20 };
 
-                accelerometer.Configure(range: 16f);
-                accelerometer.LowAndHighG.Configure(enableHighGz: true, highThreshold: 2f, highDuration: 15);
+                await accelerometer.Configure(range: 16f);
+                await accelerometer.LowAndHighG.Configure(enableHighGz: true, highThreshold: 2f, highDuration: 15);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
@@ -206,12 +206,12 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void Configure() {
+            public async Task Configure() {
                 byte[][] expected = {
                     accelerometer is IAccelerometerBmi160 ? new byte[] { 0x03, 0x0a, 0x18, 0x14, 0x7f, 0x15 } : new byte[] { 0x03, 0x0a, 0x24, 0x14, 0x7f }
                 };
 
-                accelerometer.Motion.ConfigureNo(duration: 10000, threshold: 0.5f);
+                await accelerometer.Motion.ConfigureNo(duration: 10000, threshold: 0.5f);
 
                 Assert.That(platform.GetCommands(), Is.EqualTo(expected));
             }
@@ -252,11 +252,11 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void Configure() {
+            public async Task Configure() {
                 byte[] expected = accelerometer is IAccelerometerBmi160 ? new byte[] { 0x03, 0x0a, 0x10, 0x14, 0xc0, 0x14 } : new byte[] { 0x03, 0x0a, 0x10, 0x14, 0xc0 };
 
-                accelerometer.Configure(range: 4f);
-                accelerometer.Motion.ConfigureSlow(threshold: 1.5f, count: 5);
+                await accelerometer.Configure(range: 4f);
+                await accelerometer.Motion.ConfigureSlow(threshold: 1.5f, count: 5);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
@@ -297,11 +297,11 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void Configure() {
+            public async Task Configure() {
                 byte[] expected = accelerometer is IAccelerometerBmi160 ? new byte[] { 0x03, 0x0a, 0x09, 0x2f, 0x14, 0x14 } : new byte[] { 0x03, 0x0a, 0x09, 0x2f, 0x14 };
 
-                accelerometer.Configure(range: 8f);
-                accelerometer.Motion.ConfigureAny(threshold: 0.75f, count: 10);
+                await accelerometer.Configure(range: 8f);
+                await accelerometer.Motion.ConfigureAny(threshold: 0.75f, count: 10);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
@@ -375,21 +375,21 @@ namespace MbientLab.MetaWear.Test {
             public TestTap(Type accType) : base(accType) { }
 
             [Test]
-            public void ConfigureSingle() {
+            public async Task ConfigureSingle() {
                 byte[] expected = new byte[] { 0x03, 0x0d, 0x04, 0x04 };
 
-                accelerometer.Configure(range: 16f);
-                accelerometer.Tap.Configure(threshold: 2f, shock: TapShockTime._50ms);
+                await accelerometer.Configure(range: 16f);
+                await accelerometer.Tap.Configure(threshold: 2f, shock: TapShockTime._50ms);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
 
             [Test]
-            public void StartSingle() {
+            public async Task StartSingle() {
                 byte[] expected = new byte[] { 0x03, 0x0c, 0x02, 0x00 };
 
-                accelerometer.Tap.Configure(enableSingle: true);
-                accelerometer.Tap.Start();
+                await accelerometer.Tap.Configure(enableSingle: true);
+                await accelerometer.Tap.Start();
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
@@ -409,21 +409,21 @@ namespace MbientLab.MetaWear.Test {
             }
 
             [Test]
-            public void ConfigureDouble() {
+            public async Task ConfigureDouble() {
                 byte[] expected = new byte[] { 0x03, 0x0d, 0xc4, 0x04 };
 
-                accelerometer.Configure(range: 8f);
-                accelerometer.Tap.Configure(threshold: 1f, window: DoubleTapWindow._50ms, quiet: TapQuietTime._20ms, shock: TapShockTime._75ms);
+                await accelerometer.Configure(range: 8f);
+                await accelerometer.Tap.Configure(threshold: 1f, window: DoubleTapWindow._50ms, quiet: TapQuietTime._20ms, shock: TapShockTime._75ms);
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }
 
             [Test]
-            public void StartDouble() {
+            public async Task StartDouble() {
                 byte[] expected = new byte[] { 0x03, 0x0c, 0x01, 0x00 };
 
-                accelerometer.Tap.Configure(enableDouble: true);
-                accelerometer.Tap.Start();
+                await accelerometer.Tap.Configure(enableDouble: true);
+                await accelerometer.Tap.Start();
 
                 Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
             }

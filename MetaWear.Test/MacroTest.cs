@@ -35,8 +35,8 @@ namespace MbientLab.MetaWear.Test {
             var led = metawear.GetModule<ILed>();
 
             macro.StartRecord();
-            led.EditPattern(Color.Blue, high: 16, low: 16, highTime: 500, duration: 1000, count: 5);
-            led.Play();
+            await led.EditPattern(Color.Blue, high: 16, low: 16, highTime: 500, duration: 1000, count: 5);
+            await led.Play();
             await macro.EndRecordAsync();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
@@ -75,7 +75,7 @@ namespace MbientLab.MetaWear.Test {
             var accelerometer = metawear.GetModule<IAccelerometer>();
 
             macro.StartRecord();
-            accelerometer.Configure(range: 16f);
+            await accelerometer.Configure(range: 16f);
             await accelerometer.Acceleration.AddRouteAsync(source =>
                 source.Map(Function1.Rss)
                     .LowPass(16)
@@ -84,8 +84,8 @@ namespace MbientLab.MetaWear.Test {
                         .To().Filter(Comparison.Eq, -1).Stream(null)
                         .To().Filter(Comparison.Eq, 1).Stream(null)
             );
-            accelerometer.Acceleration.Start();
-            accelerometer.Start();
+            await accelerometer.Acceleration.Start();
+            await accelerometer.Start();
             await macro.EndRecordAsync();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));

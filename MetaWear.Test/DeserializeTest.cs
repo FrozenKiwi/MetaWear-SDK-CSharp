@@ -34,7 +34,7 @@ namespace MbientLab.MetaWear.Test {
             platform.fileSuffix = "scheduled_task";
             await metawear.DeserializeAsync();
             await metawear.InitializeAsync(null);
-            metawear.LookupScheduledTask(0).Remove();
+            await metawear.LookupScheduledTask(0).Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -51,7 +51,7 @@ namespace MbientLab.MetaWear.Test {
             await metawear.InitializeAsync(null);
             var observer = metawear.LookupObserver(0);
 
-            observer.Remove();
+            await observer.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -69,8 +69,8 @@ namespace MbientLab.MetaWear.Test {
 
             var gpio = metawear.GetModule<IGpio>();
 
-            gpio.Pins[2].AbsoluteReference.Read();
-            gpio.Pins[3].Adc.Read();
+            await gpio.Pins[2].AbsoluteReference.Read();
+            await gpio.Pins[3].Adc.Read();
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -83,7 +83,7 @@ namespace MbientLab.MetaWear.Test {
             await metawear.InitializeAsync(null);
 
             var i2c = metawear.GetModule<ISerialPassthrough>().I2C(0xa, 0x1);
-            i2c.Read(0x1c, 0xd);
+            await i2c.Read(0x1c, 0xd);
             
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -111,7 +111,7 @@ namespace MbientLab.MetaWear.Test {
             platform.fileSuffix = "gpio_feedback";
             await metawear.DeserializeAsync();
             await metawear.InitializeAsync(null);
-            metawear.LookupRoute(0).Remove();
+            await metawear.LookupRoute(0).Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -126,7 +126,7 @@ namespace MbientLab.MetaWear.Test {
             await metawear.DeserializeAsync();
             await metawear.InitializeAsync(null);
 
-            metawear.GetModule<IDataProcessor>().Edit<IComparatorEditor>("multi_comp").Modify(Builder.Comparison.Lt, 128, 256);
+            await metawear.GetModule<IDataProcessor>().Edit<IComparatorEditor>("multi_comp").Modify(Builder.Comparison.Lt, 128, 256);
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -140,7 +140,7 @@ namespace MbientLab.MetaWear.Test {
             await metawear.InitializeAsync(null);
 
             var spi = metawear.GetModule<ISerialPassthrough>().SPI(0xe, 0x5);
-            spi.Read(10, 0, 11, 7, 3, SpiFrequency._8_MHz, lsbFirst: false, data: new byte[] { 0xda });
+            await spi.Read(10, 0, 11, 7, 3, SpiFrequency._8_MHz, lsbFirst: false, data: new byte[] { 0xda });
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -156,7 +156,7 @@ namespace MbientLab.MetaWear.Test {
             await metawear.InitializeAsync(null);
 
             var sensor = metawear.GetModule<ITemperature>().Sensors[0x3];
-            sensor.Read();
+            await sensor.Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -173,7 +173,7 @@ namespace MbientLab.MetaWear.Test {
                     BitConverter.ToSingle(new byte[] { 0x00, 0xd8, 0x3a, 0xc0 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0x58, 0xbf, 0xbf }, 0)), 
                 actual = null;
-            metawear.GetModule<IAccelerometer>().Configure(range: 16f);
+            await metawear.GetModule<IAccelerometer>().Configure(range: 16f);
             metawear.LookupRoute(0).AttachSubscriber(0, data => actual = data.Value<Acceleration>());
             platform.sendMockResponse(new byte[] { 0x03, 0x04, 0x16, 0xc4, 0x94, 0xa2, 0x2a, 0xd0 });
 
@@ -189,7 +189,7 @@ namespace MbientLab.MetaWear.Test {
             platform.fileSuffix = "activity_buffer";
             await metawear.DeserializeAsync();
 
-            metawear.GetModule<IDataProcessor>().State("rms_buffer").Read();
+            await metawear.GetModule<IDataProcessor>().State("rms_buffer").Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

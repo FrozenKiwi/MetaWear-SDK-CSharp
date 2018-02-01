@@ -4,6 +4,7 @@ using MbientLab.MetaWear.Sensor.AmbientLightLtr329;
 
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -31,9 +32,9 @@ namespace MbientLab.MetaWear.Impl {
             collection.Add(illuminanceData);
         }
 
-        public void Configure(Gain gain = Gain._1x, IntegrationTime time = IntegrationTime._100ms, MeasurementRate rate = MeasurementRate._500ms) {
+        public Task Configure(Gain gain = Gain._1x, IntegrationTime time = IntegrationTime._100ms, MeasurementRate rate = MeasurementRate._500ms) {
             int gainMask = gain == Gain._48x || gain == Gain._96x ? (int)gain + 2 : (int)gain;
-            bridge.sendCommand(new byte[] { (byte) AMBIENT_LIGHT, CONFIG, (byte) (gainMask << 2), (byte) ((int) time << 3 | (int) rate) });
+            return bridge.sendCommand(new byte[] { (byte) AMBIENT_LIGHT, CONFIG, (byte) (gainMask << 2), (byte) ((int) time << 3 | (int) rate) });
         }
     }
 }

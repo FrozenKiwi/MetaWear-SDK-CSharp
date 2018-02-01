@@ -41,10 +41,10 @@ namespace MbientLab.MetaWear.Test {
             RANGE_BITMASK = new byte[] { 0b000, 0b001, 0b010, 0b011, 0b100 };
 
         [TestCaseSource(typeof(GyroBmi160ConfigTestDataClass), "TestCases")]
-        public void Configure(OutputDataRate odr, DataRange range) {
+        public async Task Configure(OutputDataRate odr, DataRange range) {
             byte[][] expected = { new byte[] { 0x13, 0x03, (byte)(0x20 | ODR_BITMASK[(int) odr]), RANGE_BITMASK[(int) range] } };
 
-            gyro.Configure(odr, range);
+            await gyro.Configure(odr, range);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -60,12 +60,12 @@ namespace MbientLab.MetaWear.Test {
             };
 
             var route = await gyro.AngularVelocity.AddRouteAsync(source => source.Stream(null));
-            gyro.AngularVelocity.Start();
-            gyro.Start();
+            await gyro.AngularVelocity.Start();
+            await gyro.Start();
 
-            gyro.Stop();
-            gyro.AngularVelocity.Stop();
-            route.Remove();
+            await gyro.Stop();
+            await gyro.AngularVelocity.Stop();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -78,7 +78,7 @@ namespace MbientLab.MetaWear.Test {
                 BitConverter.ToSingle(new byte[] { 0x90, 0xc1, 0xf9, 0xc3 }, 0)
             ), actual = null;
 
-            gyro.Configure(range: DataRange._500dps);
+            await gyro.Configure(range: DataRange._500dps);
             await gyro.AngularVelocity.AddRouteAsync(source => source.Stream(data => actual = data.Value<AngularVelocity>()));
 
             platform.sendMockResponse(new byte[] { 0x13, 0x05, 0x3e, 0x43, 0xff, 0x7f, 0x00, 0x80 });
@@ -91,7 +91,7 @@ namespace MbientLab.MetaWear.Test {
             float[] expected = new float[] { 262.409f, 499.497f, -499.512f };
             float[] actual = new float[3];
 
-            gyro.Configure(range: DataRange._500dps);
+            await gyro.Configure(range: DataRange._500dps);
             await gyro.AngularVelocity.AddRouteAsync(source =>
                 source.Split().Index(0).Stream(data => actual[0] = data.Value<float>())
                         .Index(1).Stream(data => actual[1] = data.Value<float>())
@@ -127,7 +127,7 @@ namespace MbientLab.MetaWear.Test {
             int i = 0;
             await gyro.PackedAngularVelocity.AddRouteAsync(source => source.Stream(data => actual[i++] = data.Value<AngularVelocity>()));
 
-            gyro.Configure(range: DataRange._1000dps);
+            await gyro.Configure(range: DataRange._1000dps);
             platform.sendMockResponse(response);
             Assert.That(actual, Is.EqualTo(expected));
         }

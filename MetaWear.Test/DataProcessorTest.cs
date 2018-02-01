@@ -70,10 +70,10 @@ namespace MbientLab.MetaWear.Test {
             byte[] expected = new byte[] { 0x09, 0x04, 0x01, 0x00, 0x00, 0x71, 0x02 };
 
             var accelerometer = metawear.GetModule<IAccelerometer>();
-            accelerometer.Configure(range: 16f, odr: 100f);
+            await accelerometer.Configure(range: 16f, odr: 100f);
 
             await accelerometer.Acceleration.AddRouteAsync(source => source.Map(Function1.Rms).Accumulate().Name("rms_acc"));
-            metawear.GetModule<IDataProcessor>().Edit<IAccumulatorEditor>("rms_acc").Set(20000f);
+            await metawear.GetModule<IDataProcessor>().Edit<IAccumulatorEditor>("rms_acc").Set(20000f);
 
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
@@ -298,7 +298,7 @@ namespace MbientLab.MetaWear.Test {
                     .To().Map(Function2.Multiply, 18).Map(Function2.Divide, 10).Map(Function2.Add, 32).Stream()
                     .To().Map(Function2.Add, 273.15f).Stream(null)
             );
-            sensor.Read();
+            await sensor.Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

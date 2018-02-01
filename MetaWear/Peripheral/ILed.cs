@@ -1,4 +1,5 @@
-﻿using MbientLab.MetaWear.Peripheral.Led;
+﻿using System.Threading.Tasks;
+using MbientLab.MetaWear.Peripheral.Led;
 
 namespace MbientLab.MetaWear.Peripheral {
     namespace Led {
@@ -36,7 +37,7 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <param name="duration">Length of one pulse, in milliseconds (ms)</param>
         /// <param name="delay">How long to wait before starting the pattern, in milliseconds (ms), ignored on boards running firmware older than v1.2.3</param>
         /// <param name="count">How many times to repeat a pulse pattern</param>
-        void EditPattern(Color color, byte high = 0, byte low = 0, 
+        Task EditPattern(Color color, byte high = 0, byte low = 0, 
             ushort riseTime = 0, ushort highTime = 0, ushort fallTime = 0, 
             ushort duration = 0, ushort delay = 0, byte count = 0xff);
         /// <summary>
@@ -47,24 +48,24 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <param name="delay">Set how long to wait before starting the pattern, defaults to 0.  This setting is ignored 
         /// on boards running firmware older than v1.2.3</param>
         /// <param name="count">Set how many times to repeat a pulse pattern, defaults to indefinite</param>
-        void EditPattern(Color color, Pattern pattern, ushort delay = 0, byte count = 0xff);
+        Task EditPattern(Color color, Pattern pattern, ushort delay = 0, byte count = 0xff);
 
         /// <summary>
         /// Play any programmed patterns and immediately plays patterns programmed later
         /// </summary>
-        void AutoPlay();
+        Task AutoPlay();
         /// <summary>
         /// Play any programmed patterns
         /// </summary>
-        void Play();
+        Task Play();
         /// <summary>
         /// Pause the pattern playback
         /// </summary>
-        void Pause();
+        Task Pause();
         /// <summary>
         /// Stop playing LED patterns
         /// </summary>
         /// <param name="clear">True if the patterns should be cleared as well</param>
-        void Stop(bool clear);
+        Task Stop(bool clear);
     }
 }

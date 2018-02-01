@@ -47,18 +47,18 @@ namespace MbientLab.MetaWear.Impl {
                 return bridge.queueRouteBuilder(builder, analogDataType);
             }
 
-            public void Read(byte pullup = 255, byte pulldown = 255, ushort delay = 0, byte virtualPin = 255) {
+            public Task Read(byte pullup = 255, byte pulldown = 255, ushort delay = 0, byte virtualPin = 255) {
                 var info = bridge.lookupModuleInfo(GPIO);
 
                 if (info.revision >= REVISION_ENHANCED_ANALOG) {
-                    analogDataType.read(bridge, new byte[] { pullup, pulldown, (byte)(delay / 4), virtualPin });
+                    return analogDataType.read(bridge, new byte[] { pullup, pulldown, (byte)(delay / 4), virtualPin });
                 } else {
-                    analogDataType.read(bridge);
+                    return analogDataType.read(bridge);
                 }
             }
 
-            void IForcedDataProducer.Read() {
-                Read();
+            Task IForcedDataProducer.Read() {
+                return Read();
             }
         }
 
@@ -66,12 +66,12 @@ namespace MbientLab.MetaWear.Impl {
             internal GpioMonitorDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : 
                 base(PIN_CHANGE_NOTIFY_ENABLE, dataTypeBase, bridge) { }
 
-            public override void Start() {
-                bridge.sendCommand(new byte[] { (byte)GPIO, PIN_CHANGE_NOTIFY_ENABLE, dataTypeBase.eventConfig[2], 0x01 });
+            public override Task Start() {
+                return bridge.sendCommand(new byte[] { (byte)GPIO, PIN_CHANGE_NOTIFY_ENABLE, dataTypeBase.eventConfig[2], 0x01 });
             }
 
-            public override void Stop() {
-                bridge.sendCommand(new byte[] { (byte)GPIO, PIN_CHANGE_NOTIFY_ENABLE, dataTypeBase.eventConfig[2], 0x00 });
+            public override Task Stop() {
+                return bridge.sendCommand(new byte[] { (byte)GPIO, PIN_CHANGE_NOTIFY_ENABLE, dataTypeBase.eventConfig[2], 0x00 });
             }
         }
 

@@ -1,4 +1,6 @@
-﻿namespace MbientLab.MetaWear.Impl {
+﻿using System.Threading.Tasks;
+
+namespace MbientLab.MetaWear.Impl {
     class AsyncDataProducer : DataProducer, IAsyncDataProducer {
         protected readonly byte enableRegister;
 
@@ -9,12 +11,12 @@
             enableRegister = register;
         }
 
-        public virtual void Start() {
-            bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x01 });
+        public virtual Task Start() {
+            return bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x01 });
         }
 
-        public virtual void Stop() {
-            bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x00 });
+        public virtual Task Stop() {
+            return bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x00 });
         }
     }
 }

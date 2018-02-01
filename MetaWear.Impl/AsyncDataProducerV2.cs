@@ -1,4 +1,6 @@
-﻿namespace MbientLab.MetaWear.Impl {
+﻿using System.Threading.Tasks;
+
+namespace MbientLab.MetaWear.Impl {
     class AsyncDataProducerV2 : AsyncDataProducer {
         protected byte mask;
 
@@ -9,12 +11,12 @@
             this.mask = mask;
         }
 
-        public override void Start() {
-            bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, mask, 0x0 });
+        public override Task Start() {
+            return bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, mask, 0x0 });
         }
 
-        public override void Stop() {
-            bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x00, mask});
+        public override Task Stop() {
+            return bridge.sendCommand(new byte[] { dataTypeBase.eventConfig[0], enableRegister, 0x00, mask});
         }
     }
 }

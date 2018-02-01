@@ -52,7 +52,7 @@ namespace MbientLab.MetaWear.Test {
             ODR_BITMASK = new byte[] { 0, 0, 0, 5 };
 
         [Test, TestCaseSource(typeof(MagnetometerBmm150TestDataClass), "PresetTestCases")]
-        public void Configure(Preset preset) {
+        public async Task Configure(Preset preset) {
             byte[][] expected = revision >= 2 ? new byte[][] {
                 new byte[] { 0x15, 0x01, 0x00 },
                 new byte[] { 0x15, 0x04, XY_BITMASK[(int)preset], Z_BITMASK[(int)preset] },
@@ -62,7 +62,7 @@ namespace MbientLab.MetaWear.Test {
                 new byte[] { 0x15, 0x03, ODR_BITMASK[(int) preset] }
             };
 
-            magnetometer.Configure(preset);
+            await magnetometer.Configure(preset);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -78,12 +78,12 @@ namespace MbientLab.MetaWear.Test {
             };
 
             var route = await magnetometer.MagneticField.AddRouteAsync(source => source.Stream(null));
-            magnetometer.MagneticField.Start();
-            magnetometer.Start();
+            await magnetometer.MagneticField.Start();
+            await magnetometer.Start();
 
-            magnetometer.Stop();
-            magnetometer.MagneticField.Stop();
-            route.Remove();
+            await magnetometer.Stop();
+            await magnetometer.MagneticField.Stop();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

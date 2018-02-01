@@ -41,7 +41,7 @@ namespace MbientLab.MetaWear.Peripheral {
             /// <param name="pulldown">Pin to be pulled down before the read, unused by default</param>
             /// <param name="delay">How long to wait before reading from the pin, no delay by default</param>
             /// <param name="virtualPin">Directs read data to the specific virtual pin</param>
-            void Read(byte pullup = 0xff, byte pulldown = 0xff, ushort delay = 0, byte virtualPin = 0xff);
+            Task Read(byte pullup = 0xff, byte pulldown = 0xff, ushort delay = 0, byte virtualPin = 0xff);
         }
         /// <summary>
         /// Represents a physical GPIO pin

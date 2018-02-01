@@ -24,12 +24,12 @@ namespace MbientLab.MetaWear.Impl {
             bridge.addRegisterResponseHandler(Tuple.Create((byte)EVENT, ENTRY), response => createEventTask.SetResult(response[2]));
         }
 
-        public override void tearDown() {
-            bridge.sendCommand(new byte[] { (byte) EVENT, REMOVE_ALL });
+        public override Task tearDown() {
+            return bridge.sendCommand(new byte[] { (byte) EVENT, REMOVE_ALL });
         }
 
-        internal void remove(byte id) {
-            bridge.sendCommand(new byte[] { (byte) EVENT, REMOVE, id });
+        internal Task remove(byte id) {
+            return bridge.sendCommand(new byte[] { (byte) EVENT, REMOVE, id });
         }
 
         internal async Task<Queue<byte>> queueEvents(Queue<Tuple<DataTypeBase, Action>> eventCodeBlocks) {
@@ -56,7 +56,7 @@ namespace MbientLab.MetaWear.Impl {
                 }
             } catch (TimeoutException e) {
                 foreach (byte id in successfulEvents) {
-                    remove(id);
+                    await remove(id);
                 }
                 throw e;
             }

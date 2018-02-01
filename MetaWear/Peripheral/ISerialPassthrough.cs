@@ -24,7 +24,7 @@ namespace MbientLab.MetaWear.Peripheral {
             /// </summary>
             /// <param name="deviceAddr">Device to read from</param>
             /// <param name="registerAddr">Device's register to read</param>
-            void Read(byte deviceAddr, byte registerAddr);
+            Task Read(byte deviceAddr, byte registerAddr);
         }
         /// <summary>
         /// Data received from the SPI bus
@@ -42,7 +42,7 @@ namespace MbientLab.MetaWear.Peripheral {
             /// <param name="data">Data to write to the device before the read, defaults to null</param>
             /// <param name="lsbFirst">True to have LSB sent first, defaults to true</param>
             /// <param name="useNativePins">True to use the nRF pin mappings rather than the GPIO pin mappings, defaults to true</param>
-            void Read(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
+            Task Read(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
                 byte[] data = null, bool lsbFirst = true, bool useNativePins = true);
         }
     }
@@ -65,7 +65,7 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <param name="deviceAddr">Device to write to</param>
         /// <param name="registerAddr">Device's register to write to</param>
         /// <param name="data">Data to write, up to 10 bytes</param>
-        void WriteI2C(byte deviceAddr, byte registerAddr, byte[] data);
+        Task WriteI2C(byte deviceAddr, byte registerAddr, byte[] data);
         /// <summary>
         /// Read data from a sensor via the I2C bus.  Unlike <see cref="II2CDataProducer.Read(byte, byte)"/>, this function provides
         /// a direct way to access I2C data as opposed to creating a data route.
@@ -97,7 +97,7 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <param name="data">Data to write to the device</param>
         /// <param name="lsbFirst">True to have LSB sent first, defaults to true</param>
         /// <param name="useNativePins">True to use the nRF pin mappings rather than the GPIO pin mappings, defaults to true</param>
-        void WriteSPI(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
+        Task WriteSPI(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
             byte[] data, bool lsbFirst = true, bool useNativePins = true);
         /// <summary>
         /// Read data from a sensor via the SPI bus.  Unlike <see cref="ISPIDataProducer.Read(byte, byte, byte, byte, byte, SpiFrequency, bool, bool, byte[])"/>, 

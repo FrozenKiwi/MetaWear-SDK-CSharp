@@ -27,9 +27,9 @@ namespace MbientLab.MetaWear.Test {
             };
 
             await gpio.Pins[2].AbsoluteReference.AddRouteAsync(source => source.Stream());
-            gpio.Pins[2].AbsoluteReference.Read();
+            await gpio.Pins[2].AbsoluteReference.Read();
             await gpio.Pins[3].Adc.AddRouteAsync(source => source.Stream());
-            gpio.Pins[3].Adc.Read();
+            await gpio.Pins[3].Adc.Read();
 
             platform.fileSuffix = "gpio_analog";
             await metawear.SerializeAsync();
@@ -102,7 +102,7 @@ namespace MbientLab.MetaWear.Test {
             byte[][] expected = { new byte[] { 0x05, 0x88, 0x04 } };
 
             await gpio.Pins[4].Digital.AddRouteAsync(source => source.Stream());
-            gpio.Pins[4].Digital.Read();
+            await gpio.Pins[4].Digital.Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

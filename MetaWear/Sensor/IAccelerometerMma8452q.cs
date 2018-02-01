@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.AccelerometerMma8452q;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace AccelerometerMma8452q {
@@ -33,6 +34,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// </summary>
         /// <param name="odr">Output data rate</param>
         /// <param name="range">Data range</param>
-        void Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g);
+        Task Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g);
     }
 }

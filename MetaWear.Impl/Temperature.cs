@@ -4,6 +4,7 @@ using static MbientLab.MetaWear.Impl.Module;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MbientLab.MetaWear.Sensor.Temperature;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [KnownType(typeof(ExternalThermistor))]
@@ -50,8 +51,8 @@ namespace MbientLab.MetaWear.Impl {
             internal ExternalThermistor(DataTypeBase dataType, IModuleBoardBridge bridge) : base(SensorType.ExtThermistor, dataType, bridge) {
             }
 
-            public void Configure(byte dataPin, byte pulldownPin, bool activeHigh) {
-                bridge.sendCommand(new byte[] { (byte) TEMPERATURE, MODE, dataTypeBase.eventConfig[2], dataPin, pulldownPin, (byte)(activeHigh ? 1 : 0) });
+            public Task Configure(byte dataPin, byte pulldownPin, bool activeHigh) {
+                return bridge.sendCommand(new byte[] { (byte) TEMPERATURE, MODE, dataTypeBase.eventConfig[2], dataPin, pulldownPin, (byte)(activeHigh ? 1 : 0) });
             }
         }
 

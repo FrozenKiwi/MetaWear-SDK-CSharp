@@ -108,22 +108,22 @@ namespace MbientLab.MetaWear.Impl {
                 response => readConfigTask.SetResult(response));
         }
 
-        public void Configure(OutputDataRate odr, DataRange range) {
+        public Task Configure(OutputDataRate odr, DataRange range) {
             dataSettings[2] |= (byte) ((byte) odr << 3);
             dataSettings[0] |= (byte) range;
 
-            bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, dataSettings);
+            return bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, dataSettings);
         }
 
-        public void Configure(float odr = 100f, float range = 2f) {
-            Configure((OutputDataRate) Util.closestIndex(FREQUENCIES, odr), (DataRange) Util.closestIndex(RANGES, range));
+        public Task Configure(float odr = 100f, float range = 2f) {
+            return Configure((OutputDataRate) Util.closestIndex(FREQUENCIES, odr), (DataRange) Util.closestIndex(RANGES, range));
         }
 
-        public void Start() {
-            bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x1 });
+        public Task Start() {
+            return bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x1 });
         }
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x0 });
+        public Task Stop() {
+            return bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x0 });
         }
 
         public async Task PullConfigAsync() {

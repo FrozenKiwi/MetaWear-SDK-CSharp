@@ -18,12 +18,12 @@ namespace MbientLab.MetaWear.Core {
             /// <summary>
             /// Reset the internal counter
             /// </summary>
-            void Reset();
+            Task Reset();
             /// <summary>
             /// Overwrite the internal counter with a new value
             /// </summary>
             /// <param name="value">New value</param>
-            void Set(uint value);
+            Task Set(uint value);
         }
         /// <summary>
         /// Edits an accumulate component
@@ -33,12 +33,12 @@ namespace MbientLab.MetaWear.Core {
             /// <summary>
             /// Reset the running sum
             /// </summary>
-            void Reset();
+            Task Reset();
             /// <summary>
             /// Overwrite the accumulated sum with a new value
             /// </summary>
             /// <param name="value">New value</param>
-            void Set(float value);
+            Task Set(float value);
         }
         /// <summary>
         /// Edits a limiter
@@ -49,13 +49,13 @@ namespace MbientLab.MetaWear.Core {
             /// Set the internal state
             /// </summary>
             /// <param name="value">New value</param>
-            void Set(ushort value);
+            Task Set(ushort value);
             /// <summary>
             /// Changes the passthrough type and initial value
             /// </summary>
             /// <param name="type">New passthrough type</param>
             /// <param name="value">Initial value of the modified limiter</param>
-            void Modify(Passthrough type, ushort value);
+            Task Modify(Passthrough type, ushort value);
         }
         /// <summary>
         /// Edits a 2 op math component 
@@ -66,7 +66,7 @@ namespace MbientLab.MetaWear.Core {
             /// Modifies the right hand value used in the computation
             /// </summary>
             /// <param name="rhs">New right hand value</param>
-            void ModifyRhs(float rhs);
+            Task ModifyRhs(float rhs);
         }
         /// <summary>
         /// Edits a comparison filter
@@ -79,7 +79,7 @@ namespace MbientLab.MetaWear.Core {
             /// </summary>
             /// <param name="op">New comparison operation</param>
             /// <param name="references">New reference values, can be multiple values if the board is running firmware v1.2.3 or later</param>
-            void Modify(Comparison op, params float[] references);
+            Task Modify(Comparison op, params float[] references);
         }
         /// <summary>
         /// Edits a pulse finder
@@ -91,7 +91,7 @@ namespace MbientLab.MetaWear.Core {
             /// </summary>
             /// <param name="threshold">New boundary the data must exceed</param>
             /// <param name="samples">New minimum data sample size</param>
-            void Modify(float threshold, ushort samples);
+            Task Modify(float threshold, ushort samples);
         }
         /// <summary>
         /// Edits a threshold finder
@@ -103,7 +103,7 @@ namespace MbientLab.MetaWear.Core {
             /// </summary>
             /// <param name="threshold">New threshold value</param>
             /// <param name="hysteresis">New hysteresis value</param>
-            void Modify(float threshold, float hysteresis);
+            Task Modify(float threshold, float hysteresis);
         }
         /// <summary>
         /// Edits a differential finder
@@ -114,7 +114,7 @@ namespace MbientLab.MetaWear.Core {
             /// Modifies the minimum distance from the reference value
             /// </summary>
             /// <param name="distance">New minimum distance value</param>
-            void Modify(float distance);
+            Task Modify(float distance);
         }
         /// <summary>
         /// Edits a time limiter
@@ -125,7 +125,7 @@ namespace MbientLab.MetaWear.Core {
             /// Change how often to allow data through
             /// </summary>
             /// <param name="period"></param>
-            void Modify(uint period);
+            Task Modify(uint period);
         }
         /// <summary>
         /// Edits a high pass filter
@@ -136,11 +136,11 @@ namespace MbientLab.MetaWear.Core {
             /// Change how many samples are used to compute the value
             /// </summary>
             /// <param name="samples">New sample size</param>
-            void Modify(byte samples);
+            Task Modify(byte samples);
             /// <summary>
             /// Reset the running average
             /// </summary>
-            void Reset();
+            Task Reset();
         }
         /// <summary>
         /// Edits a low pass filter
@@ -151,11 +151,11 @@ namespace MbientLab.MetaWear.Core {
             /// Change how many samples are used to compute the value
             /// </summary>
             /// <param name="samples">New sample size</param>
-            void Modify(byte samples);
+            Task Modify(byte samples);
             /// <summary>
             /// Reset the running average
             /// </summary>
-            void Reset();
+            Task Reset();
         }
         /// <summary>
         /// Edits a data packer
@@ -165,7 +165,7 @@ namespace MbientLab.MetaWear.Core {
             /// <summary>
             /// Clears buffer of accumulated inputs
             /// </summary>
-            void Clear();
+            Task Clear();
         }
     }
 

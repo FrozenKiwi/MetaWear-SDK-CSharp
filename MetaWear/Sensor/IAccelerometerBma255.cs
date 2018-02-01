@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Sensor.AccelerometerBma255;
 using MbientLab.MetaWear.Sensor.AccelerometerBosch;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace AccelerometerBma255 {
@@ -36,7 +37,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// </summary>
             /// <param name="hold">Delay for which the flat value must remain stable for an interrupt</param>
             /// <param name="theta">Threshold angle defining a flat position, between [0, 44.8] degrees</param>
-            void Configure(FlatHoldTime? hold = null, float? theta = null);
+            Task Configure(FlatHoldTime? hold = null, float? theta = null);
         }
     }
 
@@ -54,6 +55,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// </summary>
         /// <param name="odr">Output data rate</param>
         /// <param name="range">Data range</param>
-        void Configure(OutputDataRate odr = OutputDataRate._125Hz, DataRange range = DataRange._2g);
+        Task Configure(OutputDataRate odr = OutputDataRate._125Hz, DataRange range = DataRange._2g);
     }
 }

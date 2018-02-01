@@ -48,10 +48,10 @@ namespace MbientLab.MetaWear.Test {
         }
 
         [TestCaseSource(typeof(ColorTcs34725TestDataClass), "ConfigureTestCases")]
-        public void Configure(Gain gain, Tuple<float, byte> time, Tuple<bool, byte> illuminator) {
+        public async Task Configure(Gain gain, Tuple<float, byte> time, Tuple<bool, byte> illuminator) {
             byte[][] expected = { new byte[] { 0x17, 0x02, time.Item2, (byte) gain, illuminator.Item2 } };
 
-            color.Configure(gain: gain, integationTime: time.Item1, illuminate:illuminator.Item1);
+            await color.Configure(gain: gain, integationTime: time.Item1, illuminate:illuminator.Item1);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
         

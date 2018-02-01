@@ -161,7 +161,7 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public void EditBleConnParams(float minConnInterval = 7.5F, float maxConnInterval = 125, ushort slaveLatency = 0, ushort supervisorTimeout = 6000) {
+        public Task EditBleConnParams(float minConnInterval = 7.5F, float maxConnInterval = 125, ushort slaveLatency = 0, ushort supervisorTimeout = 6000) {
             if (bridge.lookupModuleInfo(SETTINGS).revision >= CONN_PARAMS_REVISION) {
                 byte[] parameters = new byte[8];
                 Array.Copy(Util.ushortToBytesLe((ushort)(minConnInterval / CONN_INTERVAL_STEP)), 0, parameters, 0, 2);
@@ -169,8 +169,9 @@ namespace MbientLab.MetaWear.Impl {
                 Array.Copy(Util.ushortToBytesLe(slaveLatency), 0, parameters, 4, 2);
                 Array.Copy(Util.ushortToBytesLe((ushort)(supervisorTimeout / SUPERVISOR_TIMEOUT_STEP)), 0, parameters, 6, 2);
 
-                bridge.sendCommand(SETTINGS, CONNECTION_PARAMS, parameters);
+                return bridge.sendCommand(SETTINGS, CONNECTION_PARAMS, parameters);
             }
+            return Task.CompletedTask;
         }
 
         public async Task<IObserver> OnDisconnectAsync(Action commands) {
@@ -226,9 +227,9 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public void EditBleAdConfig(string name = null, byte? timeout = null, ushort? interval = null, sbyte? txPower = null, byte[] scanResponse = null) {
+        public async Task EditBleAdConfig(string name = null, byte? timeout = null, ushort? interval = null, sbyte? txPower = null, byte[] scanResponse = null) {
             if (name != null) {
-                bridge.sendCommand(SETTINGS, DEVICE_NAME, Encoding.ASCII.GetBytes(name));
+                await bridge.sendCommand(SETTINGS, DEVICE_NAME, Encoding.ASCII.GetBytes(name));
             }
 
             if (timeout != null || interval != null) {
@@ -250,11 +251,11 @@ namespace MbientLab.MetaWear.Impl {
                     config[3] = 0;
                 }
                 
-                bridge.sendCommand(SETTINGS, AD_INTERVAL, config);
+                await bridge.sendCommand(SETTINGS, AD_INTERVAL, config);
             }
 
             if (txPower != null) {
-                bridge.sendCommand(new byte[] { (byte) SETTINGS, TX_POWER, (byte)txPower });
+                await bridge.sendCommand(new byte[] { (byte) SETTINGS, TX_POWER, (byte)txPower });
             }
 
             if (scanResponse != null) {
@@ -263,16 +264,16 @@ namespace MbientLab.MetaWear.Impl {
                     Array.Copy(scanResponse, 0, first, 0, first.Length);
                     Array.Copy(scanResponse, first.Length, second, 0, second.Length);
 
-                    bridge.sendCommand(SETTINGS, PARTIAL_SCAN_RESPONSE, first);
-                    bridge.sendCommand(SETTINGS, SCAN_RESPONSE, second);
+                    await bridge.sendCommand(SETTINGS, PARTIAL_SCAN_RESPONSE, first);
+                    await bridge.sendCommand(SETTINGS, SCAN_RESPONSE, second);
                 } else {
-                    bridge.sendCommand(SETTINGS, SCAN_RESPONSE, scanResponse);
+                    await bridge.sendCommand(SETTINGS, SCAN_RESPONSE, scanResponse);
                 }
             }
         }
 
-        public void StartBleAdvertising() {
-            bridge.sendCommand(new byte[] { (byte)SETTINGS, START_ADVERTISING });
+        public Task StartBleAdvertising() {
+            return bridge.sendCommand(new byte[] { (byte)SETTINGS, START_ADVERTISING });
         }
     }
 }

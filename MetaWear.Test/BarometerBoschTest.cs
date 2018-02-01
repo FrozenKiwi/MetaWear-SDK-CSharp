@@ -87,10 +87,10 @@ namespace MbientLab.MetaWear.Test {
         static readonly byte[] OS_BITMASK = new byte[] { 0x20, 0x24, 0x28, 0x2c, 0x30, 0x54 },
             FILTER_BITMASK = new byte[] { 0x00, 0x04, 0x08, 0x0c, 0x10 };
         [TestCaseSource(typeof(BarometerBoschTestDataClass), "ConfigureTestCases")]
-        public void Configure(Oversampling os, IirFilerCoeff coeff) {
+        public async Task Configure(Oversampling os, IirFilerCoeff coeff) {
             byte[][] expected = { new byte[] { 0x12, 0x03, OS_BITMASK[(int) os], FILTER_BITMASK[(int) coeff] } };
 
-            barometer.Configure(os, coeff);
+            await barometer.Configure(os, coeff);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -104,7 +104,7 @@ namespace MbientLab.MetaWear.Test {
 
             var route = await (producer == BarometerProducer.Pressure ? barometer.Pressure : barometer.Altitude)
                     .AddRouteAsync(source => source.Stream(null));
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

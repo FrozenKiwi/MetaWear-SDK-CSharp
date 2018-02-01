@@ -116,8 +116,8 @@ namespace MbientLab.MetaWear.Impl {
                 return bridge.queueRouteBuilder(builder, i2cByteArray);
             }
 
-            public void Read(byte deviceAddr, byte registerAddr) {
-                bridge.sendCommand(SERIAL_PASSTHROUGH, i2cByteArray.eventConfig[1], new byte[] { deviceAddr, registerAddr, id, i2cByteArray.attributes.length() });
+            public Task Read(byte deviceAddr, byte registerAddr) {
+                return bridge.sendCommand(SERIAL_PASSTHROUGH, i2cByteArray.eventConfig[1], new byte[] { deviceAddr, registerAddr, id, i2cByteArray.attributes.length() });
             }
         }
 
@@ -136,7 +136,7 @@ namespace MbientLab.MetaWear.Impl {
                 return bridge.queueRouteBuilder(builder, spiByteArray);
             }
 
-            public void Read(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
+            public Task Read(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
                     byte[] data = null, bool lsbFirst = true, bool useNativePins = true) {
                 SpiParameterBuilder builder = new SpiParameterBuilder((byte)((spiByteArray.attributes.length() - 1) | (id << 4)));
                 builder.slaveSelectPin(slaveSelectPin)
@@ -163,7 +163,7 @@ namespace MbientLab.MetaWear.Impl {
                 Array.Copy(spiByteArray.eventConfig, 0, command, 0, 2);
                 Array.Copy(parameters, 0, command, 2, parameters.Length);
 
-                bridge.sendCommand(command);
+                return bridge.sendCommand(command);
             }
         }
 
@@ -230,7 +230,7 @@ namespace MbientLab.MetaWear.Impl {
             return producer;
         }
 
-        public void WriteI2C(byte deviceAddr, byte registerAddr, byte[] data) {
+        public Task WriteI2C(byte deviceAddr, byte registerAddr, byte[] data) {
             byte[] config= new byte[data.Length + 4];
             config[0]= deviceAddr;
             config[1]= registerAddr;
@@ -238,7 +238,7 @@ namespace MbientLab.MetaWear.Impl {
             config[3]= (byte) data.Length;
             Array.Copy(data, 0, config, 4, data.Length);
 
-            bridge.sendCommand(SERIAL_PASSTHROUGH, I2C_RW, config);
+            return bridge.sendCommand(SERIAL_PASSTHROUGH, I2C_RW, config);
         }
 
         public async Task<byte[]> ReadI2CAsync(byte deviceAddr, byte registerAddr, byte length) {
@@ -254,7 +254,7 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public void WriteSPI(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
+        public Task WriteSPI(byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,
                 byte[] data, bool lsbFirst = true, bool useNativePins = true) {
             if (bridge.lookupModuleInfo(SERIAL_PASSTHROUGH).revision >= SPI_REVISION) {
                 SpiParameterBuilder builder = new SpiParameterBuilder();
@@ -277,8 +277,9 @@ namespace MbientLab.MetaWear.Impl {
                     builder.data(data);
                 }
 
-                bridge.sendCommand(SERIAL_PASSTHROUGH, SPI_RW, builder.build());
+                return bridge.sendCommand(SERIAL_PASSTHROUGH, SPI_RW, builder.build());
             }
+            return Task.CompletedTask;
         }
 
         public async Task<byte[]> ReadSPIAsync(byte length, byte slaveSelectPin, byte clockPin, byte mosiPin, byte misoPin, byte mode, SpiFrequency frequency,

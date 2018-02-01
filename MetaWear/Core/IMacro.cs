@@ -19,12 +19,12 @@ namespace MbientLab.MetaWear.Core {
         /// Execute the commands corresponding to the macro ID
         /// </summary>
         /// <param name="id">Numerical ID of the macro to execute</param>
-        void Execute(byte id);
+        Task Execute(byte id);
         /// <summary>
         /// Remove all macros on the flash memory.  The erase operation will not be performed until
         /// you disconnect from the board.If you wish to reset the board after the erase operation,
         /// use the <see cref="IDebug.ResetAfterGc"/> method.
         /// </summary>
-        void EraseAll();
+        Task EraseAll();
     }
 }

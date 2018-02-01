@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -6,8 +7,8 @@ namespace MbientLab.MetaWear.Impl {
         internal ForcedDataProducer(DataTypeBase dataTypeBase, IModuleBoardBridge bridge) : base(dataTypeBase, bridge) {
         }
 
-        public void Read() {
-            dataTypeBase.read(bridge);
+        public Task Read() {
+            return dataTypeBase.read(bridge);
         }
     }
 }

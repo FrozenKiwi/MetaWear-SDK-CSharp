@@ -50,12 +50,12 @@ namespace MbientLab.MetaWear.Test {
             new byte[] { 0b11010000, 0b11100000 , 0b11110000 }
         };
         [TestCaseSource(typeof(ProximityTsl2671TestDataClass), "ConfigureTestCases")]
-        public void Configure(ReceiverDiode diode, TransmitterDriveCurrent current, Tuple<float, byte> time, byte pulse) {
+        public async Task Configure(ReceiverDiode diode, TransmitterDriveCurrent current, Tuple<float, byte> time, byte pulse) {
             byte[][] expected = {
                 new byte[] { 0x18, 0x2, time.Item2, pulse, CURRENT_DIODE_BITMASKS[(int) current][(int)diode] }
             };
 
-            proximity.Configure(diode, current, time.Item1, pulse);
+            await proximity.Configure(diode, current, time.Item1, pulse);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -64,7 +64,7 @@ namespace MbientLab.MetaWear.Test {
             byte[][] expected = { new byte[] { 0x18, 0x81 } };
 
             await proximity.Adc.AddRouteAsync(source => source.Stream(null));
-            proximity.Adc.Read();
+            await proximity.Adc.Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

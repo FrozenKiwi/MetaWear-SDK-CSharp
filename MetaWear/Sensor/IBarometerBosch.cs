@@ -1,4 +1,5 @@
 ﻿using MbientLab.MetaWear.Sensor.BarometerBosch;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace BarometerBosch {
@@ -48,15 +49,15 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="os">Oversampling mode, defaults to standard</param>
         /// <param name="coeff">IIR coefficient, defaults to 0 (off)</param>
         /// <param name="standbyTime">Standby time in milliseconds (ms), defaults to 0.5ms</param>
-        void Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5f);
+        Task Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5f);
 
         /// <summary>
         /// Start data sampling
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Stop data sampling
         /// </summary>
-        void Stop();
+        Task Stop();
     }
 }

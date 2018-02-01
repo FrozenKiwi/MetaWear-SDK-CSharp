@@ -40,77 +40,77 @@ namespace MbientLab.MetaWear.Test {
             new byte[] {0b00000011, 0b00000111},
         };
         [TestCaseSource(typeof(NeoPixelTestDataClass), "InitTestCases")]
-        public void Init(ColorOrdering ordering, StrandSpeed speed) {
+        public async Task Init(ColorOrdering ordering, StrandSpeed speed) {
             byte[][] expected = {
                 new byte[] { 0x06, 0x01, 0x01, INIT_MASKS[(int) ordering][(int) speed], 0x00, 0x1e },
                 new byte[] { 0x06, 0x06, 0x01 }
             };
-            var strand = neopixel.InitializeStrand(1, ordering, speed, 0, 30);
-            strand.Free();
+            var strand = await neopixel.InitializeStrand(1, ordering, speed, 0, 30);
+            await strand.Free();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Rotate() {
+        public async Task Rotate() {
             byte[] expected = new byte[] { 0x06, 0x05, 0x02, 0x01, 0x4b, 0xE8, 0x03 };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.Rotate(RotationDirection.Away, 1000, 75);
+            await strand.Rotate(RotationDirection.Away, 1000, 75);
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void RotateIndefinitely() {
+        public async Task RotateIndefinitely() {
             byte[] expected = new byte[] { 0x06, 0x05, 0x02, 0x00, 0xff, 0xfa, 0x00 };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.Rotate(RotationDirection.Towards, 250);
+            await strand.Rotate(RotationDirection.Towards, 250);
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void StopRotate() {
+        public async Task StopRotate() {
             byte[] expected = new byte[] { 0x06, 0x05, 0x02, 0x00, 0x00, 0x00, 0x00 };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.StopRotation();
+            await strand.StopRotation();
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void TurnOff() {
+        public async Task TurnOff() {
             byte[] expected = new byte[] { 0x06, 0x03, 0x02, 0x0a, 0x2d };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.Clear(10, 45);
+            await strand.Clear(10, 45);
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void SetColor() {
+        public async Task SetColor() {
             byte[] expected = new byte[] { 0x06, 0x04, 0x02, 0x18, 0xd5, 0x55, 0x6b };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.SetRgb(24, 213, 85, 107);
+            await strand.SetRgb(24, 213, 85, 107);
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Hold() {
+        public async Task Hold() {
             byte[] expected = new byte[] { 0x06, 0x02, 0x02, 0x01 };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.Hold();
+            await strand.Hold();
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Release() {
+        public async Task Release() {
             byte[] expected = new byte[] { 0x06, 0x02, 0x02, 0x00 };
-            var strand = neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
+            var strand = await neopixel.InitializeStrand(2, ColorOrdering.WS2811_RBG, StrandSpeed.Fast, 1, 60);
 
-            strand.Release();
+            await strand.Release();
             Assert.That(platform.GetLastCommand(), Is.EqualTo(expected));
         }
     }

@@ -173,7 +173,7 @@ namespace MbientLab.MetaWear.Test {
         };
 
         [TestCaseSource(typeof(SensorFusionBoschTestDataClass), "ConfigureTestCases")]
-        public void Configure(Mode mode, AccRange acc, GyroRange gyr, Sensor.AccelerometerBmi160.FilterMode accFilter, FilterMode gyroFilter) {
+        public async Task Configure(Mode mode, AccRange acc, GyroRange gyr, Sensor.AccelerometerBmi160.FilterMode accFilter, FilterMode gyroFilter) {
             byte[][] expected = null;
             byte[] configGyro100Hz = new byte[] {0x13, 0x03, (byte) (((int) gyroFilter << 4 ) | GyroBmi160Test.ODR_BITMASK[(int) OutputDataRate._100Hz]), GyroBmi160Test.RANGE_BITMASK[(int) gyr]};
 
@@ -213,7 +213,7 @@ namespace MbientLab.MetaWear.Test {
             }
             expected[1][2] |= (byte)((int) accFilter << 4);
 
-            sensorFusion.Configure(mode, acc, gyr, accExtra: new Object[] { accFilter }, gyroExtra: new object[] { gyroFilter });
+            await sensorFusion.Configure(mode, acc, gyr, accExtra: new Object[] { accFilter }, gyroExtra: new object[] { gyroFilter });
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

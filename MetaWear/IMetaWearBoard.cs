@@ -26,15 +26,15 @@ namespace MbientLab.MetaWear {
         /// <summary>
         /// Start task execution
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Stop task execution
         /// </summary>
-        void Stop();
+        Task Stop();
         /// <summary>
         /// Removes this task from the board
         /// </summary>
-        void Remove();
+        Task Remove();
     }
 
     /// <summary>
@@ -172,6 +172,6 @@ namespace MbientLab.MetaWear {
         /// <summary>
         /// Removes all routes and resources allocated on the board (observers, data processors, timers, and loggers)
         /// </summary>
-        void TearDown();
+        Task TearDown();
     }
 }

@@ -5,6 +5,7 @@ using System;
 using MbientLab.MetaWear.Sensor.BarometerBosch;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -41,22 +42,26 @@ namespace MbientLab.MetaWear.Impl {
         private class BoschPressureDataProducer : AsyncDataProducer {
             internal BoschPressureDataProducer(DataTypeBase datatype, IModuleBoardBridge bridge) : base(datatype, bridge) { }
 
-            public override void Start() {
+            public override Task Start() {
+                return Task.CompletedTask;
             }
 
-            public override void Stop() {
+            public override Task Stop() {
+                return Task.CompletedTask;
             }
         }
 
         private class BoschAltitudeDataProducer : AsyncDataProducer {
             internal BoschAltitudeDataProducer(DataTypeBase datatype, IModuleBoardBridge bridge) : base(datatype, bridge) { }
 
-            public override void Start() {
+            public override Task Start() {
                 (bridge.GetModule<IBarometerBosch>() as BarometerBosch).enableAltitude = 1;
+                return Task.CompletedTask;
             }
 
-            public override void Stop() {
+            public override Task Stop() {
                 (bridge.GetModule<IBarometerBosch>() as BarometerBosch).enableAltitude = 0;
+                return Task.CompletedTask;
             }
         }
 
@@ -93,14 +98,14 @@ namespace MbientLab.MetaWear.Impl {
             collection.Add(altitudeDataType);
         }
 
-        public void Start() {
-            bridge.sendCommand(new byte[] { (byte) BAROMETER, CYCLIC, 1, enableAltitude });
+        public Task Start() {
+            return bridge.sendCommand(new byte[] { (byte) BAROMETER, CYCLIC, 1, enableAltitude });
         }
 
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte) BAROMETER, CYCLIC, 0, 0 });
+        public Task Stop() {
+            return bridge.sendCommand(new byte[] { (byte) BAROMETER, CYCLIC, 0, 0 });
         }
 
-        public abstract void Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5F);
+        public abstract Task Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5F);
     }
 }

@@ -5,6 +5,7 @@ using System;
 using MbientLab.MetaWear.Sensor.BarometerBosch;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -48,8 +49,8 @@ namespace MbientLab.MetaWear.Impl {
             collection.Add(humidityData);
         }
 
-        public void Configure(Oversampling os = Oversampling.Standard) {
-            bridge.sendCommand(new byte[] { (byte) HUMIDITY, MODE, (byte) os });
+        public Task Configure(Oversampling os = Oversampling.Standard) {
+            return bridge.sendCommand(new byte[] { (byte) HUMIDITY, MODE, (byte) os });
         }
     }
 }

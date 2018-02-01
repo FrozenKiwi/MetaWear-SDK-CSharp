@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Sensor.BarometerBosch;
 using MbientLab.MetaWear.Sensor.BarometerBme280;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace BarometerBme280 {
@@ -28,6 +29,6 @@ namespace MbientLab.MetaWear.Sensor {
         /// <param name="os">Oversampling mode, defaults to standard</param>
         /// <param name="coeff">IIR coefficient, defaults to 0 (off)</param>
         /// <param name="time">Standby time in milliseconds (ms), defaults to 0.5ms</param>
-        void Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, StandbyTime time = StandbyTime._0_5ms);
+        Task Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, StandbyTime time = StandbyTime._0_5ms);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear {
     /// <summary>
@@ -47,6 +48,6 @@ namespace MbientLab.MetaWear {
         /// <summary>
         /// Removes the route and marks the object as invalid
         /// </summary>
-        void Remove();
+        Task Remove();
     }
 }

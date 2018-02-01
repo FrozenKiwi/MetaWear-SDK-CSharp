@@ -26,15 +26,15 @@ namespace MbientLab.MetaWear.Sensor {
         /// </summary>
         /// <param name="odr">Output data rate, defaults to 100Hz</param>
         /// <param name="range">Acceleration data range, defaults to 2g</param>
-        void Configure(float odr = 100f, float range = 2f);
+        Task Configure(float odr = 100f, float range = 2f);
         /// <summary>
         /// Switch the accelerometer into active mode
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Switch the accelerometer into standby mode
         /// </summary>
-        void Stop();
+        Task Stop();
 
         /// <summary>
         /// Pulls the current accelerometer output data rate and data range from the sensor

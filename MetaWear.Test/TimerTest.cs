@@ -37,7 +37,7 @@ namespace MbientLab.MetaWear.Test {
             };
             platform.fileSuffix = "scheduled_task";
             await metawear.SerializeAsync();
-            mwTask.Remove();
+            await mwTask.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

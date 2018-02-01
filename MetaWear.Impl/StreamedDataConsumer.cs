@@ -14,7 +14,7 @@ namespace MbientLab.MetaWear.Impl {
         }
 
         public override async Task enableStream(IModuleBoardBridge bridge) {
-            addDataHandler(bridge);
+            await addDataHandler(bridge);
 
             if ((source.eventConfig[1] & 0x80) == 0x0) {
                 if (source.eventConfig[2] == DataTypeBase.NO_ID) {
@@ -34,16 +34,16 @@ namespace MbientLab.MetaWear.Impl {
             }
         }
 
-        public override void disableStream(IModuleBoardBridge bridge) {
+        public override async Task disableStream(IModuleBoardBridge bridge) {
             if ((source.eventConfig[1] & 0x80) == 0x0) {
                 if (source.eventConfig[2] == DataTypeBase.NO_ID) {
                     if (bridge.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                        bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x0 });
+                        await bridge.sendCommand(new byte[] { source.eventConfig[0], source.eventConfig[1], 0x0 });
                     }
                 } else {
                     if (bridge.numDataHandlers(source.eventConfigAsTuple()) == 1) {
                         if (source.eventConfig[0] == (byte)Module.DATA_PROCESSOR && source.eventConfig[1] == DataProcessor.NOTIFY) {
-                            bridge.sendCommand(new byte[] { source.eventConfig[0], DataProcessor.NOTIFY_ENABLE, source.eventConfig[2], 0x0 });
+                            await bridge.sendCommand(new byte[] { source.eventConfig[0], DataProcessor.NOTIFY_ENABLE, source.eventConfig[2], 0x0 });
                         }
                     }
                 }
@@ -56,7 +56,7 @@ namespace MbientLab.MetaWear.Impl {
             bridge.removeDataHandler(source.eventConfigAsTuple(), dataResponseHandler);
         }
 
-        public override void addDataHandler(IModuleBoardBridge bridge) {
+        public override Task addDataHandler(IModuleBoardBridge bridge) {
             if (source.eventConfig[2] != DataTypeBase.NO_ID) {
                 bridge.addDataIdHeader(Tuple.Create(source.eventConfig[0], source.eventConfig[1]));
             }
@@ -109,6 +109,8 @@ namespace MbientLab.MetaWear.Impl {
             }
 
             bridge.addDataHandler(source.eventConfigAsTuple(), dataResponseHandler);
+            // TODO: Do we really need to return task from this method?
+            return Task.CompletedTask;
         }
 
         private static Tuple<DataTypeBase, EditorImplBase> findParent(DataProcessor dataprocessor, DataTypeBase child, byte type) {

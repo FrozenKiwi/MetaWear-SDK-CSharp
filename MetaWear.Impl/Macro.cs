@@ -47,12 +47,12 @@ namespace MbientLab.MetaWear.Impl {
             return id;
         }
 
-        public void EraseAll() {
-            bridge.sendCommand(new byte[] { (byte) MACRO, ERASE_ALL });
+        public Task EraseAll() {
+            return bridge.sendCommand(new byte[] { (byte) MACRO, ERASE_ALL });
         }
 
-        public void Execute(byte id) {
-            bridge.sendCommand(new byte[] { (byte) MACRO, EXECUTE, id });
+        public Task Execute(byte id) {
+            return bridge.sendCommand(new byte[] { (byte) MACRO, EXECUTE, id });
         }
 
         public void StartRecord(bool execOnBoot = true) {

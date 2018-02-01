@@ -18,17 +18,17 @@ namespace MbientLab.MetaWear.Core {
         /// Start logging data
         /// </summary>
         /// <param name="overwrite">True if older entries should be overwritten when the logger is full, defaults to false</param>
-        void Start(bool overwrite = false);
+        Task Start(bool overwrite = false);
         /// <summary>
         /// Stop logging data
         /// </summary>
-        void Stop();
+        Task Stop();
 
         /// <summary>
         /// Clear all stored logged data from the board.  The erase operation will not be performed until
         /// you disconnect from the board.
         /// </summary>
-        void ClearEntries();
+        Task ClearEntries();
 
         /// <summary>
         /// Download saved data from the flash memory with periodic progress updates
@@ -36,13 +36,13 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="nUpdates">How many progress updates to send during the download</param>
         /// <param name="updateHandler">Handler to accept download notifications</param>
         /// <returns>Task that will complete when the download has finished</returns>
-        Task DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler);
+        Task<bool> DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler);
         /// <summary>
         /// Download saved data from the flash memory with error handling but no progress updates
         /// </summary>
         /// <param name="errorHandler">Handler to process encountered errors during the download</param>
         /// <returns>Task that will complete when the download has finished</returns>
-        Task DownloadAsync(Action<LogDownloadError, byte, DateTime, byte[]> errorHandler);
+        Task<bool> DownloadAsync(Action<LogDownloadError, byte, DateTime, byte[]> errorHandler);
         /// <summary>
         /// Download saved data from the flash memory with periodic progress updates and error handling
         /// </summary>
@@ -50,11 +50,11 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="updateHandler">Handler to accept download notifications</param>
         /// <param name="errorHandler">Handler to process encountered errors during the download</param>
         /// <returns>Task that will complete when the download has finished</returns>
-        Task DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler);
+        Task<bool> DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler);
         /// <summary>
         /// Download saved data from the flash memory with no progress updates nor error handling
         /// </summary>
         /// <returns>Task that will complete when the download has finished</returns>
-        Task DownloadAsync();
+        Task<bool> DownloadAsync();
     }
 }

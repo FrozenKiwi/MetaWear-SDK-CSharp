@@ -249,12 +249,14 @@ namespace MbientLab.MetaWear.Impl {
                 this.mask = mask;
             }
 
-            public override void Start() {
+            public override Task Start() {
                 (bridge.GetModule<ISensorFusionBosch>() as SensorFusionBosch).dataEnableMask |= mask;
+                return Task.CompletedTask;
             }
 
-            public override void Stop() {
+            public override Task Stop() {
                 (bridge.GetModule<ISensorFusionBosch>() as SensorFusionBosch).dataEnableMask &= (byte)(~mask & 0xff);
+                return Task.CompletedTask;
             }
         }
 
@@ -350,9 +352,9 @@ namespace MbientLab.MetaWear.Impl {
             bridge.addRegisterResponseHandler(Tuple.Create((byte)SENSOR_FUSION, Util.setRead(MODE)), response => readConfigTask.SetResult(response));
         }
 
-        public void Configure(Mode mode = Mode.Ndof, AccRange ar = AccRange._16g, GyroRange gr = GyroRange._2000dps,
+        public async Task Configure(Mode mode = Mode.Ndof, AccRange ar = AccRange._16g, GyroRange gr = GyroRange._2000dps,
                 object[] accExtra = null, object[] gyroExtra = null) {
-            bridge.sendCommand(new byte[] {(byte) SENSOR_FUSION, MODE, (byte) ((byte) mode + 1),(byte) ((byte) ar | (((byte) gr + 1) << 4)) });
+            await bridge.sendCommand(new byte[] {(byte) SENSOR_FUSION, MODE, (byte) ((byte) mode + 1),(byte) ((byte) ar | (((byte) gr + 1) << 4)) });
 
             var accelerometer = bridge.GetModule<IAccelerometerBosch>();
             var gyro = bridge.GetModule<IGyroBmi160>();
@@ -400,7 +402,7 @@ namespace MbientLab.MetaWear.Impl {
                 case Mode.Ndof:
                     configAcc(Sensor.AccelerometerBmi160.OutputDataRate._100Hz);
                     configGyro();
-                    magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
+                    await magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
                     break;
                 case Mode.ImuPlus:
                     configAcc(Sensor.AccelerometerBmi160.OutputDataRate._100Hz);
@@ -408,87 +410,87 @@ namespace MbientLab.MetaWear.Impl {
                     break;
                 case Mode.Compass:
                     configAcc(Sensor.AccelerometerBmi160.OutputDataRate._25Hz);
-                    magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
+                    await magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
                     break;
                 case Mode.M4g:
                     configAcc(Sensor.AccelerometerBmi160.OutputDataRate._50Hz);
-                    magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
+                    await magnetometer.Configure(odr: Sensor.MagnetometerBmm150.OutputDataRate._25Hz);
                     break;
             }
         }
 
-        public void Start() {
+        public async Task Start() {
             var accelerometer = bridge.GetModule<IAccelerometerBosch>();
             var gyro = bridge.GetModule<IGyroBmi160>();
             var magnetometer = bridge.GetModule<IMagnetometerBmm150>();
 
             switch (mode) {
                 case Mode.Ndof:
-                    accelerometer.Acceleration.Start();
-                    gyro.AngularVelocity.Start();
-                    magnetometer.MagneticField.Start();
-                    accelerometer.Start();
-                    gyro.Start();
-                    magnetometer.Start();
+                    await accelerometer.Acceleration.Start();
+                    await gyro.AngularVelocity.Start();
+                    await magnetometer.MagneticField.Start();
+                    await accelerometer.Start();
+                    await gyro.Start();
+                    await magnetometer.Start();
                     break;
                 case Mode.ImuPlus:
-                    accelerometer.Acceleration.Start();
-                    gyro.AngularVelocity.Start();
-                    accelerometer.Start();
-                    gyro.Start();
+                    await accelerometer.Acceleration.Start();
+                    await gyro.AngularVelocity.Start();
+                    await accelerometer.Start();
+                    await gyro.Start();
                     break;
                 case Mode.Compass:
-                    accelerometer.Acceleration.Start();
-                    magnetometer.MagneticField.Start();
-                    accelerometer.Start();
-                    magnetometer.Start();
+                    await accelerometer.Acceleration.Start();
+                    await magnetometer.MagneticField.Start();
+                    await accelerometer.Start();
+                    await magnetometer.Start();
                     break;
                 case Mode.M4g:
-                    accelerometer.Acceleration.Start();
-                    magnetometer.MagneticField.Start();
-                    accelerometer.Start();
-                    magnetometer.Start();
+                    await accelerometer.Acceleration.Start();
+                    await magnetometer.MagneticField.Start();
+                    await accelerometer.Start();
+                    await magnetometer.Start();
                     break;
             }
 
-            bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, OUTPUT_ENABLE, dataEnableMask, 0x00 });
-            bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, ENABLE, 0x1 });
+            await bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, OUTPUT_ENABLE, dataEnableMask, 0x00 });
+            await bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, ENABLE, 0x1 });
         }
 
-        public void Stop() {
+        public async Task Stop() {
             var accelerometer = bridge.GetModule<IAccelerometerBosch>();
             var gyro = bridge.GetModule<IGyroBmi160>();
             var magnetometer = bridge.GetModule<IMagnetometerBmm150>();
 
-            bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, ENABLE, 0x0 });
-            bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, OUTPUT_ENABLE, 0x00, 0x7f });
+            await bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, ENABLE, 0x0 });
+            await bridge.sendCommand(new byte[] { (byte)SENSOR_FUSION, OUTPUT_ENABLE, 0x00, 0x7f });
 
             switch (mode) {
                 case Mode.Ndof:
-                    accelerometer.Stop();
-                    gyro.Stop();
-                    magnetometer.Stop();
-                    accelerometer.Acceleration.Stop();
-                    gyro.AngularVelocity.Stop();
-                    magnetometer.MagneticField.Stop();
+                    await accelerometer.Stop();
+                    await gyro.Stop();
+                    await magnetometer.Stop();
+                    await accelerometer.Acceleration.Stop();
+                    await gyro.AngularVelocity.Stop();
+                    await magnetometer.MagneticField.Stop();
                     break;
                 case Mode.ImuPlus:
-                    accelerometer.Stop();
-                    gyro.Stop();
-                    accelerometer.Acceleration.Stop();
-                    gyro.AngularVelocity.Stop();
+                    await accelerometer.Stop();
+                    await gyro.Stop();
+                    await accelerometer.Acceleration.Stop();
+                    await gyro.AngularVelocity.Stop();
                     break;
                 case Mode.Compass:
-                    accelerometer.Stop();
-                    magnetometer.Stop();
-                    accelerometer.Acceleration.Stop();
-                    magnetometer.MagneticField.Stop();
+                    await accelerometer.Stop();
+                    await magnetometer.Stop();
+                    await accelerometer.Acceleration.Stop();
+                    await magnetometer.MagneticField.Stop();
                     break;
                 case Mode.M4g:
-                    accelerometer.Stop();
-                    magnetometer.Stop();
-                    accelerometer.Acceleration.Stop();
-                    magnetometer.MagneticField.Stop();
+                    await accelerometer.Stop();
+                    await magnetometer.Stop();
+                    await accelerometer.Acceleration.Stop();
+                    await magnetometer.MagneticField.Stop();
                     break;
             }
         }

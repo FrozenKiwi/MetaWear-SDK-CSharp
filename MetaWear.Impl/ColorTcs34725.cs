@@ -4,6 +4,7 @@ using MbientLab.MetaWear.Sensor;
 using MbientLab.MetaWear.Sensor.ColorTcs34725;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -91,8 +92,8 @@ namespace MbientLab.MetaWear.Impl {
             collection.Add(adcDataType);
         }
 
-        public void Configure(Gain gain = Gain._1x, float integationTime = 2.4F, bool illuminate = false) {
-            bridge.sendCommand(new byte[] { (byte) COLOR_DETECTOR, MODE, (byte)(256f - integationTime / 2.4f), (byte)gain, (byte) (illuminate ? 1 : 0) });
+        public Task Configure(Gain gain = Gain._1x, float integationTime = 2.4F, bool illuminate = false) {
+            return bridge.sendCommand(new byte[] { (byte) COLOR_DETECTOR, MODE, (byte)(256f - integationTime / 2.4f), (byte)gain, (byte) (illuminate ? 1 : 0) });
         }
     }
 }

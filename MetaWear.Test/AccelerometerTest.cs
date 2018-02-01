@@ -49,12 +49,12 @@ namespace MbientLab.MetaWear.Test {
             }
 
             var route = await accelerometer.Acceleration.AddRouteAsync(source => source.Stream(null));
-            accelerometer.Acceleration.Start();
-            accelerometer.Start();
+            await accelerometer.Acceleration.Start();
+            await accelerometer.Start();
 
-            accelerometer.Stop();
-            accelerometer.Acceleration.Stop();
-            route.Remove();
+            await accelerometer.Stop();
+            await accelerometer.Acceleration.Stop();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -81,7 +81,7 @@ namespace MbientLab.MetaWear.Test {
                     BitConverter.ToSingle(new byte[] { 0x00, 0xd8, 0x3a, 0xc0 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0x58, 0xbf, 0xbf }, 0));
 
-                accelerometer.Configure(range: 4f);
+                await accelerometer.Configure(range: 4f);
                 platform.sendMockResponse(new byte[] { 0x03, 0x04, 0x16, 0xc4, 0x94, 0xa2, 0x2a, 0xd0 });
 
                 platform.fileSuffix = "bmi160_acc_route";
@@ -95,7 +95,7 @@ namespace MbientLab.MetaWear.Test {
                     BitConverter.ToSingle(new byte[] { 0x00, 0x84, 0x12, 0x40 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0xc4, 0x3a, 0x40 }, 0));
 
-                accelerometer.Configure(range: 8f);
+                await accelerometer.Configure(range: 8f);
                 platform.sendMockResponse(new byte[] { 0x03, 0x04, 0xe1, 0xb3, 0xa1, 0x24, 0xb1, 0x2e });
             }
 
@@ -112,7 +112,7 @@ namespace MbientLab.MetaWear.Test {
             };
 
             var route = await accelerometer.Acceleration.AddRouteAsync(source => source.Log());
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -139,7 +139,7 @@ namespace MbientLab.MetaWear.Test {
                     BitConverter.ToSingle(new byte[] { 0x00, 0xd8, 0x3a, 0xc0 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0x58, 0xbf, 0xbf }, 0));
 
-                accelerometer.Configure(range: 4f);
+                await accelerometer.Configure(range: 4f);
                 platform.sendMockResponse(new byte[] { 0x0b, 0x07, 0xa0, 0xe6, 66, 0, 0, 0x16, 0xc4, 0x94, 0xa2, 0xa1, 0xe6, 66, 0, 0, 0x2a, 0xd0, 0, 0 });
             } else if (accelerometer is IAccelerometerBma255) {
                 // (-4.7576f, 2.2893f, 2.9182f)
@@ -149,7 +149,7 @@ namespace MbientLab.MetaWear.Test {
                     BitConverter.ToSingle(new byte[] { 0x00, 0x84, 0x12, 0x40 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0xc4, 0x3a, 0x40 }, 0));
 
-                accelerometer.Configure(range: 8f);
+                await accelerometer.Configure(range: 8f);
                 platform.sendMockResponse(new byte[] { 0x0b, 0x07, 0xa0, 0xe6, 66, 0, 0, 0xe1, 0xb3, 0xa1, 0x24, 0xa1, 0xe6, 66, 0, 0, 0xb1, 0x2e, 0, 0 });
             }
 
@@ -171,11 +171,11 @@ namespace MbientLab.MetaWear.Test {
                 platform.sendMockResponse(new byte[] { 0x03, 0x04, 0x56, 0xfa, 0x05, 0xf6, 0x18, 0x03 });
             } else if (accelerometer is IAccelerometerBmi160) {
                 expected = new float[] { -1.872f, -2.919f, -1.495f };
-                accelerometer.Configure(range: 4f);
+                await accelerometer.Configure(range: 4f);
                 platform.sendMockResponse(new byte[] { 0x03, 0x04, 0x16, 0xc4, 0x94, 0xa2, 0x2a, 0xd0 });
             } else if (accelerometer is IAccelerometerBma255) {
                 expected = new float[] { -4.7576f, 2.2893f, 2.9182f };
-                accelerometer.Configure(range: 8f);
+                await accelerometer.Configure(range: 8f);
                 platform.sendMockResponse(new byte[] { 0x03, 0x04, 0xe1, 0xb3, 0xa1, 0x24, 0xb1, 0x2e });
             }
 
@@ -231,7 +231,7 @@ namespace MbientLab.MetaWear.Test {
                 response = new byte[] {0x03, 0x1c, 0x62, 0xb7, 0x53, 0x0d, 0xe9, 0xfd, 0x16, 0xd0, 0x4d,
                     0x0e, 0x57, 0x02, 0x8a, 0xff, 0xa1, 0x05, 0x0a, 0x01};
 
-                accelerometer.Configure(range: 8f);
+                await accelerometer.Configure(range: 8f);
             } else if (accelerometer is IAccelerometerBma255) {
                 expected = new Acceleration[] {
                     new Acceleration(
@@ -253,7 +253,7 @@ namespace MbientLab.MetaWear.Test {
                 response = new byte[] {0x03, 0x1c, 0x31, 0x26, 0x55, 0xf9, 0x65, 0x77, 0x39, 0x29, 0x89, 0xdb,
                     0xfd, 0x7f, 0x95, 0x3d, 0x61, 0xc1, 0xf1, 0x7f};
 
-                accelerometer.Configure(range: 4f);
+                await accelerometer.Configure(range: 4f);
             }
 
             platform.sendMockResponse(response);
@@ -281,7 +281,7 @@ namespace MbientLab.MetaWear.Test {
                 source.Split().Index(0).Name("x-axis")
                         .Index(1).Delay(1).Map(Function2.Subtract, "x-axis").Stream().Log()
             );
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }

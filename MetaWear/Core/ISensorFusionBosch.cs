@@ -195,17 +195,17 @@ namespace MbientLab.MetaWear.Core {
         /// <param name="gr">Gyro data range</param>
         /// <param name="accExtra">Extra configuration settings for the accelerometer</param>
         /// <param name="accGyro">Extra configuration settings for the gyro</param>
-        void Configure(Mode mode = Mode.Ndof, AccRange ar = AccRange._16g, GyroRange gr = GyroRange._2000dps,
+        Task Configure(Mode mode = Mode.Ndof, AccRange ar = AccRange._16g, GyroRange gr = GyroRange._2000dps,
             object[] accExtra = null, object[] gyroExtra = null);
 
         /// <summary>
         /// Start the algorithm
         /// </summary>
-        void Start();
+        Task Start();
         /// <summary>
         /// Stop the algorithm
         /// </summary>
-        void Stop();
+        Task Stop();
 
         /// <summary>
         /// Pulls the current sensor fusion configuration from the sensor

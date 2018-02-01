@@ -8,6 +8,7 @@ using MbientLab.MetaWear.Sensor;
 using MbientLab.MetaWear.Builder;
 using MbientLab.MetaWear.Core;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [KnownType(typeof(DataAttributes))]
@@ -57,21 +58,21 @@ namespace MbientLab.MetaWear.Impl {
                 new byte[] { eventConfig[0], Util.setRead(eventConfig[1]), eventConfig[2] };
         }
 
-        public void read(IModuleBoardBridge bridge) {
+        public Task read(IModuleBoardBridge bridge) {
             if (eventConfig[2] == NO_ID) {
-                bridge.sendCommand(new byte[] { eventConfig[0], eventConfig[1] });
+                return bridge.sendCommand(new byte[] { eventConfig[0], eventConfig[1] });
             } else {
-                bridge.sendCommand(eventConfig);
+                return bridge.sendCommand(eventConfig);
             }
         }
 
-        public void read(IModuleBoardBridge bridge, byte[] parameters) {
+        public Task read(IModuleBoardBridge bridge, byte[] parameters) {
             int length = (eventConfig[2] == NO_ID ? 2 : 3);
             byte[] cmd = new byte[parameters.Length + length];
             Array.Copy(eventConfig, 0, cmd, 0, length);
             Array.Copy(parameters, 0, cmd, length, parameters.Length);
 
-            bridge.sendCommand(cmd);
+            return bridge.sendCommand(cmd);
         }
 
         public virtual float scale(IModuleBoardBridge bridge) {

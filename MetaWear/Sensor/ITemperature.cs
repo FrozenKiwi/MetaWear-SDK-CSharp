@@ -1,5 +1,6 @@
 ﻿using MbientLab.MetaWear.Sensor.Temperature;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Sensor {
     namespace Temperature {
@@ -44,7 +45,7 @@ namespace MbientLab.MetaWear.Sensor {
             /// <param name="dataPin">GPIO pin that reads the data</param>
             /// <param name="pulldownPin">GPIO pin the pulldown resistor is connected to</param>
             /// <param name="activeHigh">True if the pulldown pin is active high</param>
-            void Configure(byte dataPin, byte pulldownPin, bool activeHigh);
+            Task Configure(byte dataPin, byte pulldownPin, bool activeHigh);
         }
     }
     /// <summary>

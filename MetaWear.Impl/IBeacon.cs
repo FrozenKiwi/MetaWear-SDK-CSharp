@@ -27,12 +27,12 @@ namespace MbientLab.MetaWear.Impl {
             bridge.addRegisterResponseHandler(Tuple.Create((byte)IBEACON, Util.setRead(PERIOD)), response => readConfigTask.SetResult(response));
         }
 
-        public void Disable() {
-            bridge.sendCommand(new byte[] { (byte)IBEACON, ENABLE, 0x0 });
+        public Task Disable() {
+            return bridge.sendCommand(new byte[] { (byte)IBEACON, ENABLE, 0x0 });
         }
 
-        public void Enable() {
-            bridge.sendCommand(new byte[] { (byte)IBEACON, ENABLE, 0x1 });
+        public Task Enable() {
+            return bridge.sendCommand(new byte[] { (byte)IBEACON, ENABLE, 0x1 });
         }
 
         public async Task<Configuration> ReadConfigAsync() {
@@ -70,15 +70,15 @@ namespace MbientLab.MetaWear.Impl {
             return new Configuration(adUuid, major, minor, period, rxPower, txPower);
         }
 
-        public void SetMajor(IDataToken major) {
-            bridge.sendCommand(new byte[] { (byte)IBEACON, MAJOR, 0x0, 0x0 }, 0, major);
+        public Task SetMajor(IDataToken major) {
+            return bridge.sendCommand(new byte[] { (byte)IBEACON, MAJOR, 0x0, 0x0 }, 0, major);
         }
 
-        public void SetMinor(IDataToken minor) {
-            bridge.sendCommand(new byte[] { (byte)IBEACON, MINOR, 0x0, 0x0 }, 0, minor);
+        public Task SetMinor(IDataToken minor) {
+            return bridge.sendCommand(new byte[] { (byte)IBEACON, MINOR, 0x0, 0x0 }, 0, minor);
         }
 
-        public void Configure(Guid? uuid = default(Guid?), ushort? major = default(ushort?), ushort? minor = default(ushort?), 
+        public async Task Configure(Guid? uuid = default(Guid?), ushort? major = default(ushort?), ushort? minor = default(ushort?), 
                 sbyte? txPower = default(sbyte?), sbyte? rxPower = default(sbyte?), 
                 ushort? period = default(ushort?)) {
             if (uuid != null) {
@@ -90,27 +90,27 @@ namespace MbientLab.MetaWear.Impl {
                 Array.Reverse(guidBytes, 6, 2);
                 Array.Reverse(guidBytes);
 
-                bridge.sendCommand(IBEACON, AD_UUID, guidBytes);
+                await bridge.sendCommand(IBEACON, AD_UUID, guidBytes);
             }
 
             if (major != null) {
-                bridge.sendCommand(IBEACON, MAJOR, Util.ushortToBytesLe(major.Value));
+                await bridge.sendCommand(IBEACON, MAJOR, Util.ushortToBytesLe(major.Value));
             }
 
             if (minor != null) {
-                bridge.sendCommand(IBEACON, MINOR, Util.ushortToBytesLe(minor.Value));
+                await bridge.sendCommand(IBEACON, MINOR, Util.ushortToBytesLe(minor.Value));
             }
 
             if (rxPower != null) {
-                bridge.sendCommand(new byte[] { (byte)IBEACON, RX, (byte)rxPower.Value });
+                await bridge.sendCommand(new byte[] { (byte)IBEACON, RX, (byte)rxPower.Value });
             }
 
             if (txPower != null) {
-                bridge.sendCommand(new byte[] { (byte)IBEACON, TX, (byte)txPower.Value });
+                await bridge.sendCommand(new byte[] { (byte)IBEACON, TX, (byte)txPower.Value });
             }
 
             if (period != null) {
-                bridge.sendCommand(IBEACON, PERIOD, Util.ushortToBytesLe(period.Value));
+                await bridge.sendCommand(IBEACON, PERIOD, Util.ushortToBytesLe(period.Value));
             }
         }
     }

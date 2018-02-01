@@ -35,10 +35,10 @@ namespace MbientLab.MetaWear.Test {
         }
 
         [TestCaseSource(typeof(HumidityBme280TestDataClass), "OversamplingTestCases")]
-        public void Configure(Oversampling os, byte mask) {
+        public async Task Configure(Oversampling os, byte mask) {
             byte[][] expected = { new byte[] { 0x16, 0x2, mask } };
 
-            humidity.Configure(os);
+            await humidity.Configure(os);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 

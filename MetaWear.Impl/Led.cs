@@ -1,6 +1,7 @@
 ﻿using MbientLab.MetaWear.Peripheral;
 using MbientLab.MetaWear.Peripheral.Led;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
     [DataContract]
@@ -74,30 +75,30 @@ namespace MbientLab.MetaWear.Impl {
                 return this;
             }
 
-            public void Commit() {
-                bridge.sendCommand(command);
+            public Task Commit() {
+                return bridge.sendCommand(command);
             }
         }
 
         public Led(IModuleBoardBridge bridge) : base(bridge) { }
 
-        public void AutoPlay() {
-            bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 2 });
+        public Task AutoPlay() {
+            return bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 2 });
         }
 
-        public void Play() {
-            bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 1 });
+        public Task Play() {
+            return bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 1 });
         }
 
-        public void Pause() {
-            bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 0 });
+        public Task Pause() {
+            return bridge.sendCommand(new byte[] { (byte) Module.LED, PLAY, 0 });
         }
 
-        public void Stop(bool clear) {
-            bridge.sendCommand(new byte[] { (byte) Module.LED, STOP, (byte) (clear ? 1 : 0) });
+        public Task Stop(bool clear) {
+            return bridge.sendCommand(new byte[] { (byte) Module.LED, STOP, (byte) (clear ? 1 : 0) });
         }
 
-        public void EditPattern(Color color, byte high = 0, byte low = 0,
+        public Task EditPattern(Color color, byte high = 0, byte low = 0,
                 ushort riseTime = 0, ushort highTime = 0, ushort fallTime = 0,
                 ushort duration = 0, ushort delay = 0, byte count = 0xff) {
             byte[] command = new byte[17] {
@@ -114,21 +115,19 @@ namespace MbientLab.MetaWear.Impl {
                 command[15] = (byte)((delay >> 8) & 0xff);
                 command[14] = (byte)(delay & 0xff);
             }
-            bridge.sendCommand(command);
+            return bridge.sendCommand(command);
         }
 
-        public void EditPattern(Color color, Pattern preset, ushort delay = 0, byte count = 0xff) {
+        public Task EditPattern(Color color, Pattern preset, ushort delay = 0, byte count = 0xff) {
             switch (preset) {
                 case Pattern.Blink:
-                    EditPattern(color, high: 31, highTime: 50, duration: 500, delay: delay, count: count);
-                    break;
+                    return EditPattern(color, high: 31, highTime: 50, duration: 500, delay: delay, count: count);
                 case Pattern.Pulse:
-                    EditPattern(color, high: 31, riseTime: 725, highTime: 500, fallTime: 725, duration: 2000, delay: delay, count: count);
-                    break;
+                    return EditPattern(color, high: 31, riseTime: 725, highTime: 500, fallTime: 725, duration: 2000, delay: delay, count: count);
                 case Pattern.Solid:
-                    EditPattern(color, high: 31, low: 31, highTime: 500, duration: 1000, delay: delay, count: count);
-                    break;
+                    return EditPattern(color, high: 31, low: 31, highTime: 500, duration: 1000, delay: delay, count: count);
             }
+            return Task.CompletedTask;
         }
     }
 }

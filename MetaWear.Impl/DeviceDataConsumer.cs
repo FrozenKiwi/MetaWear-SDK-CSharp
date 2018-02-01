@@ -22,7 +22,7 @@ namespace MbientLab.MetaWear.Impl {
         }
 
         public abstract Task enableStream(IModuleBoardBridge bridge);
-        public abstract void disableStream(IModuleBoardBridge bridge);
-        public abstract void addDataHandler(IModuleBoardBridge bridge);
+        public abstract Task disableStream(IModuleBoardBridge bridge);
+        public abstract Task addDataHandler(IModuleBoardBridge bridge);
     }
 }

@@ -2,6 +2,7 @@
 using MbientLab.MetaWear.Sensor.BarometerBmp280;
 using MbientLab.MetaWear.Sensor.BarometerBosch;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using static MbientLab.MetaWear.Impl.Module;
 
 namespace MbientLab.MetaWear.Impl {
@@ -15,16 +16,16 @@ namespace MbientLab.MetaWear.Impl {
         public BarometerBmp280(IModuleBoardBridge bridge) : base(bridge) {
         }
 
-        public void Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, StandbyTime time = StandbyTime._0_5ms) {
+        public Task Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, StandbyTime time = StandbyTime._0_5ms) {
             var tempOversampling = (byte)((os == Oversampling.UltraHigh) ? 2 : 1);
-            bridge.sendCommand(new byte[] {(byte) BAROMETER, CONFIG,
+            return bridge.sendCommand(new byte[] {(byte) BAROMETER, CONFIG,
                         (byte) (((byte) os << 2) | (tempOversampling << 5)),
                         (byte) (((byte) coeff << 2) | ((byte) time << 5))});
         }
 
-        public override void Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5f) {
+        public override Task Configure(Oversampling os = Oversampling.Standard, IirFilerCoeff coeff = IirFilerCoeff._0, float standbyTime = 0.5f) {
             int index = Util.closestIndex(STANDBY_TIMES, standbyTime);
-            Configure(os, coeff, (StandbyTime)index);
+            return Configure(os, coeff, (StandbyTime)index);
         }
     }
 }

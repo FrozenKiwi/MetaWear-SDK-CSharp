@@ -34,7 +34,7 @@ namespace MbientLab.MetaWear.Test {
             var route = await metawear.GetModule<IAccelerometer>().Acceleration.AddRouteAsync(source => source.Log());
             platform.fileSuffix = "bmi160_acc_log";
             await metawear.SerializeAsync();
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -58,7 +58,7 @@ namespace MbientLab.MetaWear.Test {
             List<sbyte[]> responses = new List<sbyte[]>();
             platform.ReadFile("bmi160_log_dl", line => responses.Add(JsonConvert.DeserializeObject<sbyte[]>(line)));
 
-            metawear.GetModule<IAccelerometer>().Configure(range: 8f);
+            await metawear.GetModule<IAccelerometer>().Configure(range: 8f);
             var task = logging.DownloadAsync();
             responses.ForEach(it => platform.sendMockResponse(it));
             await task;
@@ -84,7 +84,7 @@ namespace MbientLab.MetaWear.Test {
             List<sbyte[]> responses = new List<sbyte[]>();
             platform.ReadFile("bmi160_log_dl", line => responses.Add(JsonConvert.DeserializeObject<sbyte[]>(line)));
 
-            metawear.GetModule<IAccelerometer>().Configure(range: 8f);
+            await metawear.GetModule<IAccelerometer>().Configure(range: 8f);
             var task = logging.DownloadAsync();
             responses.ForEach(it => platform.sendMockResponse(it));
             await task;
@@ -102,7 +102,7 @@ namespace MbientLab.MetaWear.Test {
             int i = 0;
 
             var gyro = metawear.GetModule<IGyroBmi160>();
-            gyro.Configure(range: DataRange._250dps);
+            await gyro.Configure(range: DataRange._250dps);
             var route = await gyro.AngularVelocity.AddRouteAsync(source => source.Split().Index(1).Log(data => actual[i++] = data.Value<float>()));
 
             await logging.DownloadAsync();
@@ -122,7 +122,7 @@ namespace MbientLab.MetaWear.Test {
             var route = await gyro.AngularVelocity.AddRouteAsync(source => source.Split().Index(1).Log());
             platform.fileSuffix = "bmi160_gyro_y_log";
             await metawear.SerializeAsync();
-            route.Remove();
+            await route.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected).Within(0.001f));
         }

@@ -75,11 +75,11 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <summary>
         /// Enable IBeacon advertising.  You will need to disconnect from the board to advertise as an IBeacon
         /// </summary>
-        void Enable();
+        Task Enable();
         /// <summary>
         /// Disable IBeacon advertising
         /// </summary>
-        void Disable();
+        Task Disable();
 
         /// <summary>
         /// Configure IBeacon advertising settings.  Parameters that are not set will be ignored.
@@ -90,21 +90,21 @@ namespace MbientLab.MetaWear.Peripheral {
         /// <param name="txPower">IBeacon transmitting power</param>
         /// <param name="rxPower">IBeacon receiving power</param>
         /// <param name="period">IBeacon advertising period, in milliseconds (ms)</param>
-        void Configure(Guid? uuid = null, 
+        Task Configure(Guid? uuid = null, 
             ushort? major = null, ushort? minor = null, 
             sbyte? txPower = null, sbyte? rxPower = null, 
             ushort? period = null);
-        
+
         /// <summary>
         /// Set the advertising major value
         /// </summary>
         /// <param name="major">Data token representing the sensor data to use as the new major value</param>
-        void SetMajor(IDataToken major);
+        Task SetMajor(IDataToken major);
         /// <summary>
         /// Set the advertising minor value
         /// </summary>
         /// <param name="minor">Data token representing the sensor data to use as the new minor value</param>
-        void SetMinor(IDataToken minor);
+        Task SetMinor(IDataToken minor);
         
         /// <summary>
         /// Read the current IBeacon configuration
