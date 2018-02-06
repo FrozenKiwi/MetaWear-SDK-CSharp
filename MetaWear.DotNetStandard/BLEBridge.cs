@@ -28,10 +28,6 @@ namespace MetaWear.NetStandard
             set { Log.MinLogLevel = (Plugin.BluetoothLE.LogLevel)value; }
         }
 
-#if _ANDROID
-        public AndroidPerformActionsOnMainThread => CrossBleAdapter.AndroidPerformActionsOnMainThread;
-#endif
-
         public BLEBridge(MWDevice mwdevice)
         {
             device = mwdevice.device;
@@ -50,7 +46,8 @@ namespace MetaWear.NetStandard
                 // To discover services, we take the first one.
                 // The BLE library in the background will perform
                 // full service discovery.
-                var anyService = await device.WhenServiceDiscovered().Take(1);
+                var anyService = await device.WhenServiceDiscovered().FirstOrDefaultAsync();
+                var name = anyService?.Description;
             }
         }
 
@@ -77,10 +74,13 @@ namespace MetaWear.NetStandard
 
             using (var cancelSrc = new CancellationTokenSource())
             {
-                //using (this.Dialogs.Loading("Connecting", cancelSrc.Cancel, "Cancel"))
+                var config = new GattConnectionConfig
                 {
-                    connection = await device.Connect();
-                }
+                    IsPersistent = false,
+                    AutoConnect = true,
+                    Priority = ConnectionPriority.Normal
+                };
+                connection = await device.Connect(config);
             }
 
             // Cache all characteristics?
