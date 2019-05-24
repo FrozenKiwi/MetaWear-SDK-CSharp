@@ -76,12 +76,12 @@ namespace MbientLab.MetaWear.Impl {
                 return bridge.queueRouteBuilder(builder, analogDataType);
             }
 
-            public void Read(byte pullup = 255, byte pulldown = 255, ushort delay = 0) {
-                source.read(bridge, analogDataType.eventConfig[1], new byte[] { pullup, pulldown, (byte)(delay / 4), analogDataType.eventConfig[2] });
+            public Task Read(byte pullup = 255, byte pulldown = 255, ushort delay = 0) {
+                return source.read(bridge, analogDataType.eventConfig[1], new byte[] { pullup, pulldown, (byte)(delay / 4), analogDataType.eventConfig[2] });
             }
 
-            void IForcedDataProducer.Read() {
-                Read();
+            Task IForcedDataProducer.Read() {
+                return Read();
             }
         }
 

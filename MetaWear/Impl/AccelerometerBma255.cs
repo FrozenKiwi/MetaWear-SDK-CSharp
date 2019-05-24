@@ -20,7 +20,7 @@ namespace MbientLab.MetaWear.Impl {
             }
 
             public override Task Configure(ushort? holdTime = null, float? theta = null) {
-                Configure((FlatHoldTime)Util.ClosestIndex_ushort(HOLD_TIMES, holdTime ?? 512), theta);
+                return Configure((FlatHoldTime)Util.ClosestIndex_ushort(HOLD_TIMES, holdTime ?? 512), theta);
             }
 
             public Task Configure(FlatHoldTime? holdTime = null, float? theta = null) {
@@ -151,7 +151,7 @@ namespace MbientLab.MetaWear.Impl {
         }
 
         public override Task Configure(float odr = 100f, float range = 2f) {
-            Configure((OutputDataRate)Util.ClosestIndex_float(FREQUENCIES, odr), (DataRange)Util.ClosestIndex_float(RANGES, range));
+            return Configure((OutputDataRate)Util.ClosestIndex_float(FREQUENCIES, odr), (DataRange)Util.ClosestIndex_float(RANGES, range));
         }
 
         public async override Task PullConfigAsync() {

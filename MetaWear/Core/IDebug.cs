@@ -15,7 +15,7 @@ namespace MbientLab.MetaWear.Core {
         /// Commands the board to reset after performing garbage collection.  Use this function in lieu of
         /// <see cref="ResetAsync"/> to reset the board after erasing macros or log data.
         /// </summary>
-        void ResetAfterGc();
+        Task ResetAfterGc();
 
         /// <summary>
         /// Commands the board to terminate the BLE link.

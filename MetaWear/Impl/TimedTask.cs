@@ -7,6 +7,8 @@ namespace MbientLab.MetaWear.Impl {
         private TaskCompletionSource<T> taskSource = null;
         private CancellationTokenSource cts = null;
 
+        volatile bool isCompleted;
+
         internal TimedTask() { }
 
         internal async Task<T> Execute(string format, int timeout, Func<Task> action) {
@@ -18,7 +20,8 @@ namespace MbientLab.MetaWear.Impl {
                 // use task timeout pattern from https://stackoverflow.com/a/11191070
                 var delay = Task.Delay(timeout, cts.Token);
                 if (await Task.WhenAny(taskSource.Task, delay) != taskSource.Task) {
-                    if (!delay.IsCanceled) {
+                    var vAgree = isCompleted == taskSource.Task.IsCompleted;
+                    if (!taskSource.Task.IsCompleted) {
                         taskSource.SetException(new TimeoutException(string.Format(format, timeout)));
                     }
                 } else {
@@ -29,6 +32,7 @@ namespace MbientLab.MetaWear.Impl {
         }
 
         internal void SetResult(T result) {
+            isCompleted = true;
             taskSource.TrySetResult(result);
         }
 

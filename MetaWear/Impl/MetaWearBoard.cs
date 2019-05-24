@@ -153,7 +153,7 @@ namespace MbientLab.MetaWear.Impl {
 
                 public Task Start() {
                     if (Valid) {
-                        await bridge.sendCommand(new byte[] { (byte)TIMER, START, id });
+                        return bridge.sendCommand(new byte[] { (byte)TIMER, START, id });
                     }
                     return Task.CompletedTask;
                 }
@@ -241,7 +241,7 @@ namespace MbientLab.MetaWear.Impl {
                 return commands.Count() > 0 ? commands.Last().Item2.Task : Task.FromResult(true);
             }
 
-            private async void writeValue(bool force) {
+            private async Task writeValue(bool force) {
                 if (force || commands.Count() == 1) {
                     var next = commands.First();
                     try {
@@ -258,31 +258,31 @@ namespace MbientLab.MetaWear.Impl {
                     } finally {
                         commands.Dequeue();
                         if (commands.Count() > 0) {
-                            writeValue(true);
+                            await writeValue(true);
                         } else {
                             next.Item2.SetResult(true);
                         }
                     }
                 }
             }
-            public void sendCommand(byte[] command) {
+            public async Task sendCommand(byte[] command) {
                 if (GetModule<Event>() is Event eventModule && eventModule.ActiveDataType != null) {
                     eventModule.convertToEventCommand(command);
                 } else {
                     commands.Enqueue(Tuple.Create(command, new TaskCompletionSource<bool>()));
-                    writeValue(false);
+                    await writeValue(false);
                 }
             }
-            public void sendCommand(Module module, byte register, byte[] bytes) {
+            public Task sendCommand(Module module, byte register, byte[] bytes) {
                 byte[] command = new byte[bytes.Length + 2];
 
                 command[0] = (byte)module;
                 command[1] = register;
                 Array.Copy(bytes, 0, command, 2, bytes.Length);
 
-                sendCommand(command);
+                return sendCommand(command);
             }
-            public void sendCommand(Module module, byte register, byte id, byte[] bytes) {
+            public Task sendCommand(Module module, byte register, byte id, byte[] bytes) {
                 byte[] command = new byte[bytes.Length + 3];
 
                 command[0] = (byte)module;
@@ -290,25 +290,25 @@ namespace MbientLab.MetaWear.Impl {
                 command[2] = id;
                 Array.Copy(bytes, 0, command, 3, bytes.Length);
 
-                sendCommand(command);
+                return sendCommand(command);
             }
-            public void sendCommand(byte[] command, byte dest, IDataToken input) {
+            public async Task sendCommand(byte[] command, byte dest, IDataToken input) {
                 metawear.persistent.modules.TryGetValue(typeof(Event).FullName, out var module);
                 Event eventModule = module as Event;
 
                 DataTypeBase producer = (DataTypeBase)input;
                 eventModule.feedbackParams = Tuple.Create(producer.attributes.length(), producer.attributes.offset, dest);
-                sendCommand(command);
+                await sendCommand(command);
                 eventModule.feedbackParams = null;
             }
-            public void sendCommand(byte dest, IDataToken input, Module module, byte register, byte id, params byte[] parameters) {
+            public Task sendCommand(byte dest, IDataToken input, Module module, byte register, byte id, params byte[] parameters) {
                 byte[] command = new byte[parameters.Length + 3];
                 Array.Copy(parameters, 0, command, 3, parameters.Length);
                 command[0] = (byte)module;
                 command[1] = register;
                 command[2] = id;
 
-                sendCommand(command, dest, input);
+                return sendCommand(command, dest, input);
             }
 
             public Task<IRoute> queueRouteBuilder(Action<IRouteComponent> builder, DataTypeBase source) {
@@ -525,7 +525,7 @@ namespace MbientLab.MetaWear.Impl {
                 }
             }
         }
-        public int TimeForResponse { set => timeForResponse = Math.Max(0, Math.Min(value, 1000)); }
+        public int TimeForResponse { set => timeForResponse = Math.Max(0, Math.Min(value, 3000)); }
         public bool IsConnected { get; private set; }
         /// <summary>
         /// Sets a handler to receive any internal errors
@@ -752,17 +752,17 @@ namespace MbientLab.MetaWear.Impl {
                     ins?.Dispose();
                 }
             }
-            progress_cb("LoadLocal", 0.10);
-
             return successful;
         }
 
-        public async Task InitializeAsync() {
+        public async Task InitializeAsync(Action<string, double> progress_cb) {
             if (IsConnected) {
                 return;
             }
 
             await LoadBoardAttributesAsync();
+
+            progress_cb("LoadLocal", 0.10);
 
             Exception error = null;
             try {
@@ -1178,7 +1178,9 @@ namespace MbientLab.MetaWear.Impl {
                     }
 
                     List<DeviceDataConsumer> consumers = new List<DeviceDataConsumer>();
-                    top.Item2.state.subscribedProducers.ForEach(producer => {
+                    for (int i = 0; i < top.Item2.state.subscribedProducers.Count; i++)
+                    {
+                        var producer = top.Item2.state.subscribedProducers[i];
                         if (logConsumers != null && producer.Item3) {
                             var logger = logConsumers.Dequeue();
                             logger.handler = producer.Item2;
@@ -1191,7 +1193,7 @@ namespace MbientLab.MetaWear.Impl {
                         if (producer.Item4.Count() > 0) {
                             consumers[consumers.Count() - 1].name = producer.Item4;
                         }
-                    });
+                    }
 
                     await WaitForCommands();
                     pendingRoutes.Dequeue();

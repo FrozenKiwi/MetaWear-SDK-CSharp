@@ -233,7 +233,7 @@ namespace MbientLab.MetaWear.Impl {
             });
 
             if (bridge.lookupModuleInfo(LOGGING).revision >= REVISION_EXTENDED_LOGGING) {
-                await bridge.addRegisterResponseHandler(pageConfirmRegister, response => bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_PAGE_CONFIRM }));
+                bridge.addRegisterResponseHandler(pageConfirmRegister, response => bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_PAGE_CONFIRM }));
                 await bridge.sendCommand(new byte[] { pageConfirmRegister.Item1, pageConfirmRegister.Item2, 1 });
             }
             await bridge.sendCommand(new byte[] { (byte)LOGGING, READOUT_NOTIFY, 1 });
@@ -253,7 +253,7 @@ namespace MbientLab.MetaWear.Impl {
             return await downloadTask.Task;
         }
 
-        public Task DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
+        public Task<bool> DownloadAsync(uint nUpdates, Action<uint, uint> updateHandler, Action<LogDownloadError, byte, DateTime, byte[]> errorHandler) {
             return DownloadAsyncInner(nUpdates, updateHandler, errorHandler);
         }
 

@@ -166,17 +166,17 @@ namespace MbientLab.MetaWear.Impl {
                 this.delay = delay;
             }
 
-            public override void Start() {
+            public override async Task Start() {
                 AccelerometerMma8452q acc = bridge.GetModule<IAccelerometerMma8452q>() as AccelerometerMma8452q;
-                bridge.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG, new byte[] { 0x00, 0xc0, (byte)(delay / orientationSteps[acc.PwMode][acc.Odr]), 0x44, 0x84 });
+                await bridge.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG, new byte[] { 0x00, 0xc0, (byte)(delay / orientationSteps[acc.PwMode][acc.Odr]), 0x44, 0x84 });
 
-                base.Start();
+                await base.Start();
             }
 
-            public override void Stop() {
-                base.Stop();
+            public override async Task Stop() {
+                await base.Stop();
 
-                bridge.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG, new byte[] { 0x00, 0x80, 0x00, 0x44, 0x84 });
+                await bridge.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG, new byte[] { 0x00, 0x80, 0x00, 0x44, 0x84 });
             }
         }
 
@@ -243,7 +243,7 @@ namespace MbientLab.MetaWear.Impl {
                 response => readConfigTask.SetResult(response));
         }
 
-        public void Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, float? highPassCutoff = null, 
+        public Task Configure(OutputDataRate odr = OutputDataRate._100Hz, DataRange range = DataRange._2g, float? highPassCutoff = null, 
                 Oversampling oversample = Oversampling.Normal) {
             for(int i = 0; i < dataSettings.Length; i++) {
                 dataSettings[i] = 0;
@@ -258,18 +258,18 @@ namespace MbientLab.MetaWear.Impl {
                 dataSettings[0] |= 0x10;
             }
 
-            bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, dataSettings);
+            return bridge.sendCommand(ACCELEROMETER, DATA_CONFIG, dataSettings);
         }
 
-        public void Configure(float odr = 100f, float range = 2f) {
-            Configure((OutputDataRate) Util.ClosestIndex_float(FREQUENCIES, odr), (DataRange) Util.ClosestIndex_float(RANGES, range));
+        public Task Configure(float odr = 100f, float range = 2f) {
+            return Configure((OutputDataRate) Util.ClosestIndex_float(FREQUENCIES, odr), (DataRange) Util.ClosestIndex_float(RANGES, range));
         }
 
-        public void Start() {
-            bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x1 });
+        public Task Start() {
+            return bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x1 });
         }
-        public void Stop() {
-            bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x0 });
+        public Task Stop() {
+            return bridge.sendCommand(new byte[] { (byte) ACCELEROMETER, GLOBAL_ENABLE, 0x0 });
         }
 
         public async Task PullConfigAsync() {
