@@ -18,6 +18,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixtureSource(typeof(MetaWearBoardTestFixtureData), "Params")]
     class MetaWearBoardTest : UnitTestBase {
         private Model model;
@@ -28,6 +29,7 @@ namespace MbientLab.MetaWear.Test {
 
         [Test]
         public async Task SerializeAsync() {
+            platform.fileSuffix = string.Format("{0}_serialize_test", model.ToString());
             await metawear.SerializeAsync();
         }
 
@@ -168,8 +170,9 @@ namespace MbientLab.MetaWear.Test {
                 new byte[] { 0x0b, 0x84 }
             };
 
-            platform = new NunitPlatform(new InitializeResponse("1.3.4", typeof(IGpio), typeof(ILogging)));
-            platform.fileSuffix = "scheduled_task";
+            platform = new NunitPlatform(new InitializeResponse("1.3.4", typeof(IGpio), typeof(ILogging))) {
+                fileSuffix = "scheduled_task"
+            };
 
             metawear = new MetaWearBoard(platform, platform);
             await metawear.DeserializeAsync();
@@ -218,7 +221,7 @@ namespace MbientLab.MetaWear.Test {
             {"NeoPixel", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 0 } } },
             {"IBeacon", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 0 } } },
             {"Haptic", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 0 } } },
-            {"DataProcessor", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 2 }, { "extra", "[0x1c]" } } },
+            {"DataProcessor", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 3 }, { "extra", "[0x1c]" } } },
             {"Event", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 0 }, { "extra", "[0x1c]" } } },
             {"Logging", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 2 }, { "extra", "[0x08, 0x80, 0x2b, 0x00, 0x00]" } } },
             {"Timer", new Dictionary<string, object>() { {"implementation", 0 }, {"revision", 0 }, { "extra", "[0x08]" } } },
@@ -259,7 +262,11 @@ namespace MbientLab.MetaWear.Test {
             }
 
             foreach (var k in actual.Keys) {
-                Assert.That(actual[k], Is.EqualTo(expected[k]));
+                if (actual[k] is IDictionary && expected[k] is IDictionary) {
+                    CompareDictionary(actual[k] as IDictionary, expected[k] as IDictionary);
+                } else {
+                    Assert.That(actual[k], Is.EqualTo(expected[k]));
+                }
             }
         }
 

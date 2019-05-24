@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MbientLab.MetaWear.Core;
+using System;
 
 namespace MbientLab.MetaWear.Builder {
     /// <summary>
@@ -99,7 +100,7 @@ namespace MbientLab.MetaWear.Builder {
         Binary
     }
     /// <summary>
-    /// Output modes for the differentiail filter
+    /// Output modes for the differential filter
     /// </summary>
     public enum Differential {
         /// <summary>
@@ -114,6 +115,20 @@ namespace MbientLab.MetaWear.Builder {
         /// 1 if the difference is positive, -1 if negative
         /// </summary>
         Binary
+    }
+    /// <summary>
+    /// Types of information the accounter processor can append to the data
+    /// </summary>
+    public enum AccountType {
+        /// <summary>
+        /// Append a looping counter to all data.  This counter is accessed by calling <see cref="IData.Extra{T}"/> 
+        /// with the <code>uint</code> type.
+        /// </summary>
+        Count,
+        /// <summary>
+        /// Extra information used to calculate actual timestamps for streamed data
+        /// </summary>
+        Time
     }
 
     /// <summary>
@@ -144,25 +159,27 @@ namespace MbientLab.MetaWear.Builder {
         IRouteComponent Index(int i);
 
         /// <summary>
-        /// Streams the input data to the local device
+        /// Streams the input data to the local device.  This component is represented by the <see cref="ISubscriber"/> interface.
         /// </summary>
-        /// <param name="subscriber">Handler to process the received data</param>
+        /// <param name="handler">Handler to process the received data</param>
         /// <returns>Calling object</returns>
-        IRouteComponent Stream(Action<IData> subscriber);
+        IRouteComponent Stream(Action<IData> handler);
         /// <summary>
-        /// Streams the input data to the local device.  A data handler can be later attached with <see cref="IRoute.AttachSubscriber(int, Action{IData})"/>
+        /// Variant of <see cref="Stream(Action{IData})"/> that enables a data stream but does not yet assign a data handler.  
+        /// The handler can be later attached with <see cref="ISubscriber.Attach(Action{IData})"/>
         /// </summary>
         /// <returns>Calling object</returns>
         IRouteComponent Stream();
         /// <summary>
-        /// Records the input data to the on-board logger, retrieved later when a log download is started
+        /// Records the input data to the on-board logger, retrieved later when a log download is started.  This component is represented 
+        /// by the <see cref="ISubscriber"/> interface.
         /// </summary>
-        /// <param name="subscriber">Handler to process the received data</param>
+        /// <param name="handler">Handler to process the received data</param>
         /// <returns>Calling object</returns>
-        IRouteComponent Log(Action<IData> subscriber);
+        IRouteComponent Log(Action<IData> handler);
         /// <summary>
-        /// Records the input data to the on-board logger, retrieved later when a log download is started.  
-        /// A data handler can be later attached with <see cref="IRoute.AttachSubscriber(int, Action{IData})"/>
+        /// Variant of <see cref="Log(Action{IData})"/> that sets up the logger but does not yet assign a data handler.  
+        /// The handler can be later attached with <see cref="ISubscriber.Attach(Action{IData})"/>
         /// </summary>
         /// <returns></returns>
         IRouteComponent Log();
@@ -175,8 +192,9 @@ namespace MbientLab.MetaWear.Builder {
         IRouteComponent React(Action<IDataToken> action);
 
         /// <summary>
-        /// Assigns a user-defined name identifying the processor or producer.  The name is used to create feedback and feedforward loops.
-        /// <para>If used with a processor, the processor can be retrieved by said name with the <see cref="IDataProcessor"/> interface.</para>
+        /// Assigns a user-defined name identifying a processor, producer, or subscriber.  The name can be used to create feedback and feedforward loops, 
+        /// or refere to subscribers by name rather than index.
+        /// <para>Processors and subscribers are retrieved by name with the <see cref="IDataProcessor"/> interface and <see cref="IRoute.LookupSubscriber(string)"/> method respectively.</para>
         /// </summary>
         /// <param name="name">Assigned unique name to the most recent data producer (sensor or data processor)</param>
         /// <returns>Calling object</returns>
@@ -333,15 +351,29 @@ namespace MbientLab.MetaWear.Builder {
         IRouteComponent Map(Function2 fn, params string[] names);
 
         /// <summary>
-        /// Add additional information to the payload to reconstruct timestamps from streamed data
+        /// Variant of <see cref="Account(AccountType)"/> that defaults to recalculating timestamps
         /// </summary>
         /// <returns>Component representing the accounter output</returns>
         IRouteComponent Account();
+        /// <summary>
+        /// Add additional information to the payload to assist in checking if streamed data is lost
+        /// </summary>
+        /// <param name="type">Type of information to append to the data</param>
+        /// <returns>Component representing the accounter output</returns>
+        IRouteComponent Account(AccountType type);
         /// <summary>
         /// Packs multiple input values into 1 BTLE packet.  Used to reduce the number of packets broadcasted over the link.
         /// </summary>
         /// <param name="count">Number of input values to pack</param>
         /// <returns>Component representing the accounter output</returns>
         IRouteComponent Pack(byte count);
+
+        /// <summary>
+        /// Combines data from multiple sources into 1 packet, available on firmware v1.4.4+.  
+        /// The additional data you want to combine must first be stored into a named buffer.
+        /// </summary>
+        /// <param name="bufferNames">Named buffer components holding the extra data to combine</param>
+        /// <returns>Component representing the fuser output</returns>
+        IRouteComponent Fuse(params string[] bufferNames);
     }
 }

@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Test {
+    [Parallelizable]
     [TestFixture]
     class DebugTest : UnitTestBase {
         private IDebug debug;
@@ -62,6 +63,23 @@ namespace MbientLab.MetaWear.Test {
 
             debug.ResetAfterGc();
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task ReceivedTmpValue() {
+            unchecked {
+                int expected = (int)0xdeadbeef;
+                var task = debug.ReadTmpValueAsync();
+
+                platform.sendMockResponse(new byte[] { 0xfe, 0x84, 0xef, 0xbe, 0xad, 0xde });
+                Assert.That(await task, Is.EqualTo(expected));
+            }
+        }
+
+        [Test]
+        public void NoPowerSave() {
+            // test framework uses older debug revision, should be false here
+            Assert.That(debug.EnablePowerSave(), Is.False);
         }
     }
 }

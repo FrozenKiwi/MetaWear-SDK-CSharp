@@ -10,13 +10,15 @@ using MbientLab.MetaWear.Core.DataProcessor;
 using MbientLab.MetaWear.Peripheral.Led;
 using MbientLab.MetaWear.Sensor.Temperature;
 using MbientLab.MetaWear.Data;
+using System.Collections.Generic;
 
 namespace MbientLab.MetaWear.Test {
-    class DataProcessorTest : UnitTestBase {
-        public DataProcessorTest() : base(typeof(ISwitch), typeof(ILed), typeof(IAccelerometerBmi160),
+    abstract class DataProcessorTest : UnitTestBase {
+        public DataProcessorTest() : base(typeof(ISwitch), typeof(ILed), typeof(IAccelerometerBmi160), typeof(IGyroBmi160),
             typeof(IBarometerBmp280), typeof(IGpio), typeof(ILogging), typeof(IDataProcessor), typeof(ITemperature)) { }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestProcessorState : DataProcessorTest {
         [SetUp]
@@ -31,7 +33,7 @@ namespace MbientLab.MetaWear.Test {
             );
 
             var bufferState = metawear.GetModule<IDataProcessor>().State("rms_buffer");
-            await bufferState.AddRouteAsync(source => source.Stream());
+            await bufferState.AddRouteAsync(source => source.Stream().Name("buffer_state_stream"));
         }
 
         [Test]
@@ -56,13 +58,14 @@ namespace MbientLab.MetaWear.Test {
             float expected = 260.5125f;
             float actual = 0f;
 
-            metawear.LookupRoute(1).AttachSubscriber(0, data => actual = data.Value<float>());
+            metawear.LookupRoute(1).LookupSubscriber("buffer_state_stream").Attach(data => actual = data.Value<float>());
 
             platform.sendMockResponse(new byte[] { 0x09, 0x84, 0x02, 0xcd, 0x20, 0x41, 0x00 });
             Assert.That(actual, Is.EqualTo(expected));
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestRms : DataProcessorTest {
         [Test]
@@ -91,6 +94,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestAccRightShift : DataProcessorTest {
         [Test]
@@ -123,6 +127,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestLedController : DataProcessorTest {
         [Test]
@@ -154,6 +159,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestFreeFall : DataProcessorTest {
         [SetUp]
@@ -183,6 +189,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestFeedback : DataProcessorTest {
         [Test]
@@ -260,6 +267,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestPulse : DataProcessorTest {
         [Test]
@@ -275,6 +283,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestMaths : DataProcessorTest {
         [Test]
@@ -304,6 +313,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestComparator : DataProcessorTest {
         [Test]
@@ -312,7 +322,7 @@ namespace MbientLab.MetaWear.Test {
                 new byte[] {0x09, 0x02, 0x05, 0xc7, 0x15, 0x20, 0x06, 0x2a, 0x00, 0x04, 0x00, 0x02, 0x00, 0x01, 0x80, 0x00 }
             };
 
-            var pin = metawear.GetModule<IGpio>().CreateVirtualPin(0x15);
+            var pin = metawear.GetModule<IGpio>().Pins[0].CreateVirtualPin(0x15);
             await pin.Adc.AddRouteAsync(source => source.Filter(Comparison.Gte, ComparisonOutput.Absolute, 1024, 512, 256, 128).Name("multi_comp"));
 
             platform.fileSuffix = "multi_comparator";
@@ -322,6 +332,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestPacker : DataProcessorTest {
         [Test]
@@ -363,6 +374,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestAccounter : DataProcessorTest {
         [Test]
@@ -447,8 +459,57 @@ namespace MbientLab.MetaWear.Test {
 
             Assert.That(actual, Is.EqualTo(expected));
         }
+
+        [Test]
+        public async Task CreateCountMode() {
+            byte[][] expected = {
+                new byte[] { 0x09, 0x02, 0x03, 0x04, 0xff, 0xa0, 0x11, 0x30, 0x03 }
+            };
+
+            var accelerometer = metawear.GetModule<IAccelerometer>();
+            await accelerometer.Acceleration.AddRouteAsync(source => source.Account(AccountType.Count));
+
+            Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task CountData() {
+            uint? count = null;
+
+            var accelerometer = metawear.GetModule<IAccelerometer>();
+            await accelerometer.Acceleration.AddRouteAsync(source => source.Account(AccountType.Count).Stream(data => count = data.Extra<uint>()));
+            platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x00, 0xec, 0x01, 0x00, 0x00, 0x01, 0x0b, 0x9a, 0x07, 0x40, 0x40 });
+
+            Assert.That(count.Value, Is.EqualTo(492));
+        }
+
+        [Test]
+        public async Task CountAndTime() {
+            var barometer = metawear.GetModule<IBarometerBosch>();
+            var accelerometer = metawear.GetModule<IAccelerometer>();
+
+            DateTime? prev = null;
+            List<int> offsets = new List<int>();
+            await accelerometer.Acceleration.AddRouteAsync(source =>
+                source.Pack(2).Account(AccountType.Count).Stream()
+            );
+            await barometer.Pressure.AddRouteAsync(source => source.Account().Stream(_ => {
+                if (prev.HasValue) {
+                    offsets.Add(Convert.ToInt32((_.Timestamp - prev.Value).TotalMilliseconds));
+                }
+                prev = _.Timestamp;
+                Console.WriteLine("time: " + _.Timestamp.ToString("MM/dd/yyyy hh:mm:ss.fffffff"));
+            }));
+
+            platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x02, 0x72, 0xA4, 0x03, 0x00, 0x77, 0x6C, 0x84, 0x01 });
+            platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0x8D, 0x00, 0x00, 0x00, 0x4E, 0xFF, 0x35, 0xFD, 0x79, 0x07, 0x4D, 0xFF, 0x35, 0xFD, 0x7D, 0x07 });
+            platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x02, 0xA4, 0xA4, 0x03, 0x00, 0x05, 0x65, 0x84, 0x01 });
+
+            Assert.That(offsets, Is.EqualTo(new List<int>() { 73 }));
+        }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestAccounterPackerChain : DataProcessorTest {
         [SetUp]
@@ -478,7 +539,7 @@ namespace MbientLab.MetaWear.Test {
 
             int i = 0;
             DateTime? prev = null;
-            metawear.LookupRoute(0).AttachSubscriber(0, data => {
+            metawear.LookupRoute(0).Subscribers[0].Attach(data => {
                 if (prev != null) {
                     actual[i++] = Convert.ToInt32((data.Timestamp - prev.Value).TotalMilliseconds);
                 }
@@ -503,7 +564,7 @@ namespace MbientLab.MetaWear.Test {
             float[] actual = new float[expected.Length];
 
             int i = 0;
-            metawear.LookupRoute(0).AttachSubscriber(0, data => actual[i++] = data.Value<float>());
+            metawear.LookupRoute(0).Subscribers[0].Attach(data => actual[i++] = data.Value<float>());
 
             platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0x7b, 0x64, 0x02, 0x00, 0xec, 0x00, 0x92, 0x64, 0x02, 0x00, 0xeb, 0x00 });
             platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0xa8, 0x64, 0x02, 0x00, 0xef, 0x00, 0xbf, 0x64, 0x02, 0x00, 0xed, 0x00 });
@@ -523,6 +584,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestPackerAccounterChain : DataProcessorTest {
         [SetUp]
@@ -551,14 +613,14 @@ namespace MbientLab.MetaWear.Test {
             float[] actual = new float[expected.Length];
 
             int i = 0;
-            metawear.LookupRoute(0).AttachSubscriber(0, data => actual[i++] = data.Value<float>());
+            metawear.LookupRoute(0).Subscribers[0].Attach(data => actual[i++] = data.Value<float>());
 
             platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0x04, 0x85, 0xa0, 0x00, 0xc4, 0x00, 0xc5, 0x00, 0xc4, 0x00, 0xc3, 0x00 });
             platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0x5e, 0x85, 0xa0, 0x00, 0xc2, 0x00, 0xc3, 0x00, 0xc4, 0x00, 0xc2, 0x00 });
 
             Assert.That(actual, Is.EqualTo(expected));
         }
-        
+
         [Test]
         public void ExtractOffset() {
             int[] expected = new int[] { 0, 0, 0, 132, 0, 0, 0, 132, 0, 0, 0, 133, 0, 0, 0 };
@@ -566,7 +628,7 @@ namespace MbientLab.MetaWear.Test {
 
             int i = 0;
             DateTime? prev = null;
-            metawear.LookupRoute(0).AttachSubscriber(0, data => {
+            metawear.LookupRoute(0).Subscribers[0].Attach(data => {
                 if (prev != null) {
                     actual[i++] = Convert.ToInt32((data.Timestamp - prev.Value).TotalMilliseconds);
                 }
@@ -587,6 +649,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestHighPassFilter : DataProcessorTest {
         [Test]
@@ -608,7 +671,7 @@ namespace MbientLab.MetaWear.Test {
             );
             Acceleration actual = null;
 
-            await metawear.GetModule<IAccelerometer>().Acceleration.AddRouteAsync(source => 
+            await metawear.GetModule<IAccelerometer>().Acceleration.AddRouteAsync(source =>
                 source.HighPass(4).Stream(data => actual = data.Value<Acceleration>())
             );
             platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x00, 0xef, 0xff, 0x29, 0x00, 0x16, 0x00 });
@@ -617,6 +680,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class TestDelay : DataProcessorTest {
         [Test]
@@ -640,6 +704,88 @@ namespace MbientLab.MetaWear.Test {
             );
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task SplitOutput() {
+            var accelerometer = metawear.GetModule<IAccelerometerBmi160>();
+
+            var route = await accelerometer.Acceleration.AddRouteAsync(source =>
+                source.Stream().Delay(8).Split()
+                    .Index(0).Accumulate().Stream().Name("split_acc")
+            );
+
+            {
+                byte[][] expected = new byte[][] {
+                    new byte[] { 0x09, 0x02, 0x03, 0x04, 0xff, 0xa0, 0x0a, 0x05, 0x08 },
+                    new byte[] { 0x09, 0x02, 0x09, 0x03, 0x00, 0x20, 0x02, 0x07 },
+                    new byte[] { 0x03, 0x04, 0x01 },
+                    new byte[] { 0x09, 0x03, 0x01 },
+                    new byte[] { 0x09, 0x07, 0x01, 0x01 }
+                };
+                Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+            }
+
+            {
+                float? actual = null;
+                route.LookupSubscriber("split_acc").Attach(data => actual = data.Value<float>());
+
+                platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x01, 0x9f, 0xc9, 0x12, 0x00 });
+                Assert.That(actual.Value, Is.EqualTo(75.150f).Within(0.001));
+            }
+        }
+    }
+
+    [Parallelizable]
+    [TestFixture]
+    class TestFuser : DataProcessorTest {
+        [SetUp]
+        public async override Task SetUp() {
+            await base.SetUp();
+
+            var acc = metawear.GetModule<IAccelerometer>();
+            var gyro = metawear.GetModule<IGyroBmi160>();
+
+            await gyro.AngularVelocity.AddRouteAsync(source => source.Buffer().Name("gyro-buffer"));
+            await acc.Acceleration.AddRouteAsync(source => source.Fuse("gyro-buffer").Limit(20).Stream());
+        }
+
+        [Test]
+        public void CreateAccGyroFusion() {
+            byte[][] expected = new byte[][] {
+                    new byte[] {0x09, 0x02, 0x13, 0x05, 0xff, 0xa0, 0x0f, 0x05},
+                    new byte[] {0x09, 0x02, 0x03, 0x04, 0xff, 0xa0, 0x1b, 0x01, 0x00},
+                    new byte[] {0x09, 0x02, 0x09, 0x03, 0x01, 0x60, 0x08, 0x13, 0x14, 0x00, 0x00, 0x00},
+                    new byte[] {0x09, 0x03, 0x01},
+                    new byte[] {0x09, 0x07, 0x02, 0x01}
+            };
+
+            Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task HandleData() {
+            IData accData = null, gyroData = null;
+            metawear.LookupRoute(1).Subscribers[0].Attach(_ => {
+                var values = _.Value<IData[]>();
+                accData = values[0];
+                gyroData = values[1];
+            });
+
+
+            IData accRaw = null, gyroRaw = null;
+            var acc = metawear.GetModule<IAccelerometer>();
+            var gyro = metawear.GetModule<IGyroBmi160>();
+
+            await gyro.AngularVelocity.AddRouteAsync(source => source.Stream(_ => gyroRaw = _));
+            await acc.Acceleration.AddRouteAsync(source => source.Stream(_ => accRaw = _));
+
+            platform.sendMockResponse(new byte[] { 0x09, 0x03, 0x02, 0xf4, 0x0d, 0x3c, 0x39, 0x99, 0x11, 0x01, 0x80, 0xd6, 0x91, 0xd3, 0x67 });
+            platform.sendMockResponse(new byte[] { 0x03, 0x04, 0xf4, 0x0d, 0x3c, 0x39, 0x99, 0x11 });
+            platform.sendMockResponse(new byte[] { 0x13, 0x05, 0x01, 0x80, 0xd6, 0x91, 0xd3, 0x67 });
+
+            Assert.That(accData.Value<Acceleration>(), Is.EqualTo(accRaw.Value<Acceleration>()));
+            Assert.That(gyroData.Value<AngularVelocity>(), Is.EqualTo(gyroRaw.Value<AngularVelocity>()));
         }
     }
 }

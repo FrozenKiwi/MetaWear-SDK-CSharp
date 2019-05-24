@@ -4,8 +4,6 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Test {
@@ -25,7 +23,7 @@ namespace MbientLab.MetaWear.Test {
                 foreach (var mode in Enum.GetValues(typeof(Gain))) {
                     foreach (var time in integrationTimes) {
                         foreach(var led in illuminator) {
-                            testCases.Add(new TestCaseData(mode, time, led));
+                            testCases.Add(new TestCaseData(mode, time.Item1, time.Item2, led.Item1, led.Item2));
                         }
                     }
                 }
@@ -33,7 +31,8 @@ namespace MbientLab.MetaWear.Test {
             }
         }
     }
-    
+
+    [Parallelizable]
     [TestFixture]
     class ColorTcs34725Test : UnitTestBase {
         private IColorTcs34725 color;
@@ -48,10 +47,10 @@ namespace MbientLab.MetaWear.Test {
         }
 
         [TestCaseSource(typeof(ColorTcs34725TestDataClass), "ConfigureTestCases")]
-        public async Task Configure(Gain gain, Tuple<float, byte> time, Tuple<bool, byte> illuminator) {
-            byte[][] expected = { new byte[] { 0x17, 0x02, time.Item2, (byte) gain, illuminator.Item2 } };
+        public void Configure(Gain gain, float time, byte timeMask, bool illuminator, byte illuminatorMask) {
+            byte[][] expected = { new byte[] { 0x17, 0x02, timeMask, (byte) gain, illuminatorMask } };
 
-            await color.Configure(gain: gain, integationTime: time.Item1, illuminate:illuminator.Item1);
+            color.Configure(gain: gain, integationTime: time, illuminate: illuminator);
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
         

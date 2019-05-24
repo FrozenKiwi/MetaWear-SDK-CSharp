@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Test {
+    [Parallelizable]
     [TestFixture]
     class SettingsRev5Test : UnitTestBase {
         private ISettings settings;
@@ -16,6 +17,16 @@ namespace MbientLab.MetaWear.Test {
             await base.SetUp();
 
             settings = metawear.GetModule<ISettings>();
+        }
+
+        [Test]
+        public async Task Serialize() {
+            await settings.Battery.AddRouteAsync(source => source.Stream());
+            await settings.ChargeStatus.AddRouteAsync(source => source.Stream());
+            await settings.PowerStatus.AddRouteAsync(source => source.Stream());
+
+            platform.fileSuffix = "settings_rev5";
+            await metawear.SerializeAsync();
         }
 
         [Test]

@@ -1,5 +1,7 @@
 ﻿using MbientLab.MetaWear.Core;
 using MbientLab.MetaWear.Data;
+using MbientLab.MetaWear.Impl;
+using MbientLab.MetaWear.Peripheral;
 using MbientLab.MetaWear.Sensor;
 using NUnit.Framework;
 using System;
@@ -12,7 +14,8 @@ namespace MbientLab.MetaWear.Test {
         class TestBase : UnitTestBase {
             protected IList<IAnonymousRoute> loggers;
 
-            public TestBase() : base(typeof(IAccelerometerBmi160), typeof(IGyroBmi160), typeof(IMagnetometerBmm150), typeof(ISensorFusionBosch), typeof(ILogging), typeof(IDataProcessor)) {
+            public TestBase() : base(typeof(IAccelerometerBmi160), typeof(IGyroBmi160), typeof(IMagnetometerBmm150), typeof(ISensorFusionBosch), 
+                    typeof(ILogging), typeof(IDataProcessor), typeof(IGpio)) {
             }
 
             [SetUp]
@@ -34,6 +37,53 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
+        [TestFixture]
+        class TestCreateAndSync : TestBase {
+            public TestCreateAndSync() : base() {
+            }
+
+            [SetUp]
+            public async override Task SetUp() {
+                metawear = new MetaWearBoard(platform, platform);
+                await metawear.InitializeAsync();
+
+                AddCustomResponses();
+            }
+
+            protected override void AddCustomResponses() {
+                base.AddCustomResponses();
+
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x00 },
+                        new byte[] { 0x0b, 0x82, 0x03, 0x04, 0xff, 0x60 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x01 },
+                        new byte[] { 0x0b, 0x82, 0x03, 0x04, 0xff, 0x24 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x02 },
+                        new byte[] { 0x0b, 0x82, 0x13, 0x05, 0xff, 0x60 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x03 },
+                        new byte[] { 0x0b, 0x82, 0x13, 0x05, 0xff, 0x24 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x04 },
+                        new byte[] { 0x0b, 0x82 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x05 },
+                        new byte[] { 0x0b, 0x82 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x06 },
+                        new byte[] { 0x0b, 0x82 });
+                platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x07 },
+                        new byte[] { 0x0b, 0x82 });
+            }
+
+            [Test]
+            public async Task SyncLoggers() {
+                await metawear.GetModule<IAccelerometer>().Acceleration.AddRouteAsync(source => source.Log());
+                await metawear.GetModule<IGyroBmi160>().AngularVelocity.AddRouteAsync(source => source.Log());
+
+                loggers = await metawear.CreateAnonymousRoutesAsync();
+
+                Assert.That(loggers.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Parallelizable]
         [TestFixture]
         class TestAcceleration : TestBase {
             public TestAcceleration() : base() {
@@ -80,6 +130,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestGyroY : TestBase {
             public TestGyroY() : base() {
@@ -129,6 +180,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestSplitImu : TestBase {
             public TestSplitImu() : base() {
@@ -184,6 +236,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestMultipleLoggers : TestBase {
             public TestMultipleLoggers() : base() {
@@ -216,6 +269,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestActivity : TestBase {
             public TestActivity() : base() {   
@@ -286,6 +340,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestQuaternionLimiter : TestBase {
             public TestQuaternionLimiter() : base() {      
@@ -325,6 +380,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestTimeout : UnitTestBase {
             public TestTimeout() : base(typeof(IAccelerometerBmi160), typeof(IGyroBmi160), typeof(IMagnetometerBmm150), typeof(ISensorFusionBosch), typeof(ILogging), typeof(IDataProcessor)) {
@@ -368,6 +424,7 @@ namespace MbientLab.MetaWear.Test {
             }
         }
 
+        [Parallelizable]
         [TestFixture]
         class TestBmi160StepCounter : TestBase {
             public TestBmi160StepCounter() : base() {

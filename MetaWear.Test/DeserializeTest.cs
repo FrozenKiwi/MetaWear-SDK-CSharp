@@ -5,11 +5,14 @@ using MbientLab.MetaWear.Impl;
 using MbientLab.MetaWear.Peripheral;
 using MbientLab.MetaWear.Peripheral.SerialPassthrough;
 using MbientLab.MetaWear.Sensor;
+using MbientLab.MetaWear.Sensor.Temperature;
 using NUnit.Framework;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Test {
+    [Parallelizable]
     [TestFixture]
     class DeserializeTest : UnitTestBase {
         public DeserializeTest() : base() {
@@ -33,8 +36,8 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "scheduled_task";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
-            await metawear.LookupScheduledTask(0).Remove();
+            await metawear.InitializeAsync();
+            metawear.LookupScheduledTask(0).Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -48,10 +51,10 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "observer_rev2";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
             var observer = metawear.LookupObserver(0);
 
-            await observer.Remove();
+            observer.Remove();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -65,12 +68,12 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "gpio_analog";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
             var gpio = metawear.GetModule<IGpio>();
 
-            await gpio.Pins[2].AbsoluteReference.Read();
-            await gpio.Pins[3].Adc.Read();
+            gpio.Pins[2].AbsoluteReference.Read();
+            gpio.Pins[3].Adc.Read();
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
 
@@ -80,10 +83,10 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "i2c_stream";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
             var i2c = metawear.GetModule<ISerialPassthrough>().I2C(0xa, 0x1);
-            await i2c.Read(0x1c, 0xd);
+            i2c.Read(0x1c, 0xd);
             
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -110,8 +113,10 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "gpio_feedback";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
-            await metawear.LookupRoute(0).Remove();
+            await metawear.InitializeAsync();
+
+            metawear.LookupRoute(0).Remove();
+            await (metawear as MetaWearBoard).WaitForCommands();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -124,9 +129,10 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "multi_comparator";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
-            await metawear.GetModule<IDataProcessor>().Edit<IComparatorEditor>("multi_comp").Modify(Builder.Comparison.Lt, 128, 256);
+            metawear.GetModule<IDataProcessor>().Edit<IComparatorEditor>("multi_comp").Modify(Builder.Comparison.Lt, 128, 256);
+            await (metawear as MetaWearBoard).WaitForCommands();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -137,10 +143,10 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "spi_stream";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
             var spi = metawear.GetModule<ISerialPassthrough>().SPI(0xe, 0x5);
-            await spi.Read(10, 0, 11, 7, 3, SpiFrequency._8_MHz, lsbFirst: false, data: new byte[] { 0xda });
+            spi.Read(10, 0, 11, 7, 3, SpiFrequency._8_MHz, lsbFirst: false, data: new byte[] { 0xda });
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
         }
@@ -153,12 +159,28 @@ namespace MbientLab.MetaWear.Test {
 
             platform.fileSuffix = "temperature";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
             var sensor = metawear.GetModule<ITemperature>().Sensors[0x3];
-            await sensor.Read();
+            sensor.Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+
+        [Test]
+        public async Task CheckTemperatureTypes() {
+            platform.fileSuffix = "temperature";
+            await metawear.DeserializeAsync();
+            await metawear.InitializeAsync();
+
+            SensorType[] types = new SensorType[] {
+                SensorType.NrfSoc,
+                SensorType.PresetThermistor,
+                SensorType.ExtThermistor,
+                SensorType.BoschEnv
+            };
+            Assert.That(metawear.GetModule<ITemperature>().Sensors.Select(_ => _.Type).ToArray(), Is.EqualTo(types));
         }
 
         [Test]
@@ -166,15 +188,15 @@ namespace MbientLab.MetaWear.Test {
             // Tests that object references are preserved in serialization
             platform.fileSuffix = "bmi160_acc_route";
             await metawear.DeserializeAsync();
-            await metawear.InitializeAsync(null);
+            await metawear.InitializeAsync();
 
             Acceleration expected = new Acceleration(
                     BitConverter.ToSingle(new byte[] { 0x00, 0xa8, 0xef, 0xbf }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0xd8, 0x3a, 0xc0 }, 0),
                     BitConverter.ToSingle(new byte[] { 0x00, 0x58, 0xbf, 0xbf }, 0)), 
                 actual = null;
-            await metawear.GetModule<IAccelerometer>().Configure(range: 16f);
-            metawear.LookupRoute(0).AttachSubscriber(0, data => actual = data.Value<Acceleration>());
+            metawear.GetModule<IAccelerometer>().Configure(range: 16f);
+            metawear.LookupRoute(0).LookupSubscriber("acc_stream").Attach(data => actual = data.Value<Acceleration>());
             platform.sendMockResponse(new byte[] { 0x03, 0x04, 0x16, 0xc4, 0x94, 0xa2, 0x2a, 0xd0 });
 
             Assert.That(actual, Is.Not.EqualTo(expected));
@@ -189,9 +211,41 @@ namespace MbientLab.MetaWear.Test {
             platform.fileSuffix = "activity_buffer";
             await metawear.DeserializeAsync();
 
-            await metawear.GetModule<IDataProcessor>().State("rms_buffer").Read();
+            metawear.GetModule<IDataProcessor>().State("rms_buffer").Read();
 
             Assert.That(platform.GetCommands(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task CreateAnonRoutes() {
+            platform.customResponses.Add(new byte[] { 0x3, 0x83 },
+                    new byte[] { 0x03, 0x83, 40, 8 });
+            platform.customResponses.Add(new byte[] { 0x13, 0x83 },
+                    new byte[] { 0x13, 0x83, 40, 3 });
+            platform.customResponses.Add(new byte[] { 0x19, 0x82 },
+                    new byte[] { 0x19, 0x82, 0x1, 0xf });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x00 },
+                    new byte[] { 0x0b, 0x82, 0x03, 0x04, 0xff, 0x60 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x01 },
+                    new byte[] { 0x0b, 0x82, 0x03, 0x04, 0xff, 0x24 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x02 },
+                    new byte[] { 0x0b, 0x82 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x03 },
+                    new byte[] { 0x0b, 0x82 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x04 },
+                    new byte[] { 0x0b, 0x82 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x05 },
+                    new byte[] { 0x0b, 0x82 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x06 },
+                    new byte[] { 0x0b, 0x82 });
+            platform.customResponses.Add(new byte[] { 0xb, 0x82, 0x07 },
+                    new byte[] { 0x0b, 0x82 });
+
+            platform.fileSuffix = "activity_buffer";
+            await metawear.DeserializeAsync();
+            await metawear.InitializeAsync();
+
+            await metawear.CreateAnonymousRoutesAsync();
         }
     }
 }

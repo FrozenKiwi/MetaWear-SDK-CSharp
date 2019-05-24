@@ -21,6 +21,7 @@ namespace MbientLab.MetaWear.Test {
         }
     }
 
+    [Parallelizable]
     [TestFixture]
     class HumidityBme280Test : UnitTestBase {
         private IHumidityBme280 humidity;
@@ -51,6 +52,17 @@ namespace MbientLab.MetaWear.Test {
 
             platform.sendMockResponse(new byte[] { 0x16, 0x81, 0xc7, 0xfc, 0x00, 0x00 });
             Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task SerializeModule() {
+            platform.fileSuffix = "humidity280_route";
+            // Have to add route to trigger SerializationException  
+            // Weird because it should be thrown without a route
+            await humidity.Percentage.AddRouteAsync(source => source.Stream());
+            await metawear.SerializeAsync();
+
+            Assert.That(true);
         }
     }
 }
