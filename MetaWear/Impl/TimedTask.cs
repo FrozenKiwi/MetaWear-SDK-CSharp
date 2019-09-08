@@ -3,15 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MbientLab.MetaWear.Impl {
-    class TimedTask<T> {
+    public class TimedTask<T> {
         private TaskCompletionSource<T> taskSource = null;
         private CancellationTokenSource cts = null;
 
         volatile bool isCompleted;
 
-        internal TimedTask() { }
+        public TimedTask() { }
 
-        internal async Task<T> Execute(string format, int timeout, Func<Task> action) {
+        public async Task<T> Execute(string format, int timeout, Func<Task> action) {
             taskSource = new TaskCompletionSource<T>();
             cts = new CancellationTokenSource();
 
@@ -31,12 +31,14 @@ namespace MbientLab.MetaWear.Impl {
             return await taskSource.Task;
         }
 
-        internal void SetResult(T result) {
+        public bool Completed => isCompleted;
+
+        public void SetResult(T result) {
             isCompleted = true;
             taskSource.TrySetResult(result);
         }
 
-        internal void SetError(Exception e) {
+        public void SetError(Exception e) {
             taskSource.TrySetException(e);
         }
     }
