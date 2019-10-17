@@ -187,7 +187,7 @@ namespace MbientLab.MetaWear.Core {
         /// Sets the radio's transmitting power
         /// </summary>
         /// <param name="power">One of: 4, 0, -4, -8, -12, -16, -20, or -30</param>
-        void SetTxPower(sbyte power);
+        Task SetTxPower(sbyte power);
         /// <summary>
         /// Edit the ble connection parameters
         /// </summary>

@@ -276,8 +276,8 @@ namespace MbientLab.MetaWear.Impl {
             return (sbyte)response[2];
         }
 
-        public void SetTxPower(sbyte power) {
-            bridge.sendCommand(new byte[] { (byte)SETTINGS, TX_POWER, (byte)power });
+        public Task SetTxPower(sbyte power) {
+            return bridge.sendCommand(new byte[] { (byte)SETTINGS, TX_POWER, (byte)power });
         }
     }
 }
